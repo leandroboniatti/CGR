@@ -11,6 +11,7 @@ Entrega da Lista 1 de Fundamentos de Computação Gráfica
 etc.
 
 
+
 1.b) Quais os dois tipos de shaders são obrigatórios no pipeline programável da versão atual que trabalhamos em aula e o que eles processam?
    
 
