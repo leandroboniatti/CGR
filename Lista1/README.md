@@ -1,9 +1,9 @@
-Lista 1 de FundamentosCG
-Ian Rossetti Boniatti - Curso Jogos Digitais
+#Lista 1 de FundamentosCG
+#Ian Rossetti Boniatti - Curso Jogos Digitais
 
 Entrega da Lista 1 de Fundamentos de Computação Gráfica
 
-Parte 1 - Teoria
+## Parte 1 - Teoria
 1.a) O que é a GLSL?
 
 GLSL é uma Linguagem associada ao OpenGL, usada para criar shaders que manipulam vértices, pixels e calculam iluminação. Utilizada para programação gráfica em múltiplas plataformas, como Windows, Linux, MacOS, etc.
