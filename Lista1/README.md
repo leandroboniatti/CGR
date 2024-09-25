@@ -5,11 +5,12 @@ Ian Rossetti Boniatti - Curso Jogos Digitais
 Entrega da Lista 1 de Fundamentos de Computação Gráfica
 
 ## Parte 1 - Teoria
-1.a) O que é a GLSL?
+1.
+   a) O que é a GLSL?
    GLSL é uma Linguagem associada ao OpenGL, usada para criar shaders que manipulam vértices, pixels e calculam iluminação. Utilizada para programação gráfica em múltiplas plataformas, como Windows, Linux, MacOS,
 etc.
 
-1.b) Quais os dois tipos de shaders são obrigatórios no pipeline programável da versão atual que trabalhamos em aula e o que eles processam?
+   b) Quais os dois tipos de shaders são obrigatórios no pipeline programável da versão atual que trabalhamos em aula e o que eles processam?
    
 
 
@@ -20,11 +21,9 @@ etc.
 
 2.b) Como fazemos o armazenamento dos vértices na OpenGL?
 
-
-
-
 3. Explique o que é VBO e VAO, e como se relacionam (se achar mais fácil, pode fazer um gráfico representando a relação entre eles).
-4. Analise o código fonte do projeto Hello Triangle. Localize e relacione os conceitos de shaders, VBOs e VAO apresentados até então. Não precisa entregar nada neste exercício.
+   
+5. Analise o código fonte do projeto Hello Triangle. Localize e relacione os conceitos de shaders, VBOs e VAO apresentados até então. Não precisa entregar nada neste exercício.
 
 
 
