@@ -1,5 +1,6 @@
 /*** Hello Triangle ***/
 /*** Disciplina de Computação Gráfica - Jogos Digitais - Unisinos ***/
+/*** Aluno: Ian Rossetti Boniatti ***/
 /*** Código adaptado da adaptaçao de Rossana Baptista Queiroz de https://learnopengl.com/#!Getting-started/Hello-Triangle ***/
 
 
@@ -15,7 +16,7 @@
 
 #include <GLFW/glfw3.h> // biblioteca de funções para criação da janela no Windows
 
-using namespace std;	// Para não precisar digitar std:: na frente de por exemplo cout e cin
+using namespace std;	// Para não precisar digitar std:: na frente de por exemplo cout e cin					
 
 
 /*** Protótipos das funções ***/
