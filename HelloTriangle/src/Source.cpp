@@ -35,7 +35,7 @@ const GLchar* vertexShaderSource = "#version 400\n"
 "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
 "}\0";
 
-//Códifo fonte do Fragment Shader (em GLSL): ainda hardcoded
+//Código fonte do Fragment Shader (em GLSL): ainda hardcoded
 const GLchar* fragmentShaderSource = "#version 400\n"
 "uniform vec4 inputColor;\n"
 "out vec4 color;\n"
@@ -70,14 +70,14 @@ int main()
 	// Fazendo o registro da função de callback para a janela GLFW
 	glfwSetKeyCallback(window, key_callback);
 
-	// GLAD: carrega todos os ponteiros d funções da OpenGL
+	// GLAD: carrega todos os ponteiros de funções da OpenGL
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 
 	}
 
-	// Obtendo as informações de versão
+	// Obtendo as informações de versão da placa de video
 	const GLubyte* renderer = glGetString(GL_RENDERER); /* get renderer string */
 	const GLubyte* version = glGetString(GL_VERSION); /* version as a string */
 	cout << "Renderer: " << renderer << endl;
@@ -123,7 +123,7 @@ int main()
 
 		// Chamada de desenho - drawcall
 		// Poligono Preenchido - GL_TRIANGLES
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 6);              //Mudei de 3 pra 6 para fazer 2 triângulos
 
 		glBindVertexArray(0); //Desconectando o buffer de geometria
 
@@ -146,7 +146,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-//Esta função está basntante hardcoded - objetivo é compilar e "buildar" um programa de
+//Esta função está bastante hardcoded - objetivo é compilar e "buildar" um programa de
 // shader simples e único neste exemplo de código
 // O código fonte do vertex e fragment shader está nos arrays vertexShaderSource e
 // fragmentShader source no iniçio deste arquivo
@@ -212,7 +212,9 @@ int setupGeometry()
 		 0.5, -0.5, 0.0, //v1
  		 0.0,  0.5, 0.0, //v2
 		//T1
-			  
+		-0.5,  0.5, 0.0, //v0
+		-0.2,  0.5, 0.0, //v1
+ 		-0.5,  0.0, 0.0, //v2			  
 	};
 
 	GLuint VBO, VAO;
