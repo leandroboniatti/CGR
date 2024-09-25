@@ -6,8 +6,10 @@ Entrega da Lista 1 de Fundamentos de Computação Gráfica
 
 ## Parte 1 - Teoria
 1.a) O que é a GLSL?
+
    GLSL é uma Linguagem associada ao OpenGL, usada para criar shaders que manipulam vértices, pixels e calculam iluminação. Utilizada para programação gráfica em múltiplas plataformas, como Windows, Linux, MacOS,
 etc.
+
 
 1.b) Quais os dois tipos de shaders são obrigatórios no pipeline programável da versão atual que trabalhamos em aula e o que eles processam?
    
