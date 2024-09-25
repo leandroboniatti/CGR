@@ -2,6 +2,7 @@
 /*** Disciplina de Computação Gráfica - Jogos Digitais - Unisinos ***/
 /*** Código adaptado da adaptaçao de Rossana Baptista Queiroz de https://learnopengl.com/#!Getting-started/Hello-Triangle ***/
 
+
 /*** INCLUDES ***/
 
 #include <iostream>
@@ -25,11 +26,12 @@ int setupShader();		// Protótipo da função responsável pela criação do ...
 
 int setupGeometry();	// Protótipo da função responsável pela criação do .....
 
-// Dimensões da janela (pode ser alterado em tempo de execução)
-const GLuint WIDTH = 800, HEIGHT = 600;
 
-// Código fonte do Vertex Shader (em GLSL): ainda hardcoded
-const GLchar* vertexShaderSource = "#version 400\n"
+/*** Constantes	***/
+
+const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela (pode ser alterado em tempo de execução)
+
+const GLchar* vertexShaderSource = "#version 400\n"		// Código fonte do Vertex Shader (em GLSL): ainda hardcoded
 "layout (location = 0) in vec3 position;\n"
 "void main()\n"
 "{\n"
@@ -37,8 +39,7 @@ const GLchar* vertexShaderSource = "#version 400\n"
 "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
 "}\0";
 
-//Código fonte do Fragment Shader (em GLSL): ainda hardcoded
-const GLchar* fragmentShaderSource = "#version 400\n"
+const GLchar* fragmentShaderSource = "#version 400\n"	//Código fonte do Fragment Shader (em GLSL): ainda hardcoded
 "uniform vec4 inputColor;\n"
 "out vec4 color;\n"
 "void main()\n"
@@ -46,7 +47,9 @@ const GLchar* fragmentShaderSource = "#version 400\n"
 "color = inputColor;\n"
 "}\n\0";
 
-// Função MAIN
+
+/*** Função MAIN ***/
+
 int main()
 {
 	// Inicialização da GLFW
