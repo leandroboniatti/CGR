@@ -1,27 +1,29 @@
-/* Hello Triangle - código adaptado da adaptaçao de Rossana Baptista Queiroz de https://learnopengl.com/#!Getting-started/Hello-Triangle 
- *
- * Disciplina de Computação Gráfica - Unisinos
-*/
+/*** Hello Triangle ***/
+/*** Disciplina de Computação Gráfica - Jogos Digitais - Unisinos ***/
+/*** Código adaptado da adaptaçao de Rossana Baptista Queiroz de https://learnopengl.com/#!Getting-started/Hello-Triangle ***/
+
+/*** INCLUDES ***/
 
 #include <iostream>
 #include <string>
-#include <assert.h>		// COM .h é biblioteca do C - SEM o .h é biblioteca do C++
+#include <assert.h> // COM .h é biblioteca do C - SEM o .h é biblioteca do C++
+
+/** Certifique-se de incluir a GLAD antes de outros arquivos de cabeçalho que requerem OpenGL (como GLFW) **/
+
+#include <glad/glad.h> // biblioteca de funções baseada nas definições/especificações OPENGL
+
+#include <GLFW/glfw3.h> // biblioteca de funções para criação da janela no Windows
 
 using namespace std;	// Para não precisar digitar std:: na frente de por exemplo cout e cin
 
-// GLAD
-#include <glad/glad.h>
 
-// GLFW
-#include <GLFW/glfw3.h>
+/*** Protótipos das funções ***/
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode); // Protótipo da função de callback de teclado
 
-// Protótipo da função de callback de teclado
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+int setupShader();		// Protótipo da função responsável pela criação do .....
 
-// Protótipos das funções
-int setupShader();
-int setupGeometry();
+int setupGeometry();	// Protótipo da função responsável pela criação do .....
 
 // Dimensões da janela (pode ser alterado em tempo de execução)
 const GLuint WIDTH = 800, HEIGHT = 600;
