@@ -29,7 +29,7 @@ int setupGeometry();	// Protótipo da função responsável pela criação do VB
 
 /*** Constantes	***/
 
-const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela (pode ser alterado em tempo de execução)
+const GLuint WIDTH = 600, HEIGHT = 600;	// Dimensões da janela (pode ser alterado em tempo de execução)
 
 const GLchar* vertexShaderSource = "#version 400\n"		// Código fonte do Vertex Shader (em GLSL - Graphics Library Shading Language)
 "layout (location = 0) in vec3 position;\n"	// "position" recebe as informações que estão no local 0 -> definidas no setupGeometry() -> glVertexAttribPointer(0, xxxxxxxx);
@@ -42,10 +42,10 @@ const GLchar* vertexShaderSource = "#version 400\n"		// Código fonte do Vertex 
 
 const GLchar* fragmentShaderSource = "#version 400\n"	//Código fonte do Fragment Shader (em GLSL - Graphics Library Shading Language)
 "uniform vec4 inputColor;\n"
-"out vec4 color;\n"
+"out vec4 outColor;\n"
 "void main()\n"
 "{\n"
-"color = inputColor;\n"
+"outColor = inputColor;\n" 
 "}\0";
 
 
@@ -87,7 +87,7 @@ int main() {
 	GLuint shaderID = setupShader(); 	// Compilando e montando o programa de shader (retorna o identificador OpenGL para o programa de shader)
 	
 	GLuint VAOm = setupGeometry();		// Função para Gerar um buffer VAO simples com a geometria de um triângulo (retorna o identificador OpenGL para o VAO
-										// O identificador será armazenado em "VAOm" para não confundir com o VAO interno da função "setupGeometry()"
+										// O identificador será armazenado em "VAOm" para não confundir com o VAO interno da função "setupGeometry() - VAOm = VAO"
 	
 	// Neste código, para enviar a cor desejada para o fragment shader, utilizamos variável do tipo uniform (um vec4) já que a informação não estará nos buffers
 	glUseProgram(shaderID);
@@ -104,14 +104,23 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glLineWidth(10);	// o espessura padrão da linha é 1 pixel - alterado para....
-		glPointSize(20);	// o tamanho padrão do ponto é 1 pixel - alterado para....
+		glPointSize(10);	// o tamanho padrão do ponto é 1 pixel - alterado para....
 
 		glBindVertexArray(VAOm); //Conectando ao buffer de geometria
 
 		glUniform4f(colorLoc, 1.0f, 0.0f, 0.0f, 1.0f); //enviando cor do objeto para variável uniform chamada "inputColor" -> glUniform4f(%RED, %GREEN, %BLUE, %ALPHA);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3); 	// Chamada de desenho - drawcall	// Poligono totalmente Preenchido - GL_TRIANGLES
+		glDrawArrays(GL_TRIANGLES, 0, 6); 	// Comando de Renderizacao = Chamada de desenho = drawcall	// Poligono totalmente Preenchido - GL_TRIANGLES
 											// Mudar de 3 pra 6 para fazer 2 triângulos
+
+		glUniform4f(colorLoc, 0.0f, 1.0f, 0.0f, 1.0f);
+
+		glDrawArrays(GL_LINE_LOOP, 0, 3);
+		glDrawArrays(GL_LINE_LOOP, 3, 3);
+
+		glUniform4f(colorLoc, 0.0f, 0.0f, 1.0f, 1.0f);
+
+		glDrawArrays(GL_POINTS,0,6);
 
 		glBindVertexArray(0);	//Desconectando o buffer de geometria
 		
@@ -212,7 +221,7 @@ int setupGeometry() {
 	// T2 ....			  
 	};
 
-	GLuint VBO, VAOi;
+	GLuint VBO, VAO;
 	
 	glGenBuffers(1, &VBO);	// Geração do identificador do VBO (Vertex Buffer Objects)
 	
@@ -221,11 +230,11 @@ int setupGeometry() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);	//Envia os dados do array de floats para o buffer da OpenGl
 
 
-	glGenVertexArrays(1, &VAOi);	// Geração do identificador do VAO (Vertex Array Object)
+	glGenVertexArrays(1, &VAO);	// Geração do identificador do VAO (Vertex Array Object)
 
 	// Vincula (bind) o VAO primeiro, e em seguida conecta e seta o(s) buffer(s) de vértices
 	// e os ponteiros para os atributos 
-	glBindVertexArray(VAOi);
+	glBindVertexArray(VAO);
 
 	// Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando: 
 	// Localização no shader * (a localização dos atributos devem ser correspondentes no layout especificado no vertexShaderSource)
@@ -243,5 +252,5 @@ int setupGeometry() {
 
 	glBindVertexArray(0); // Desvincula o VAO (é uma boa prática desvincular qualquer buffer ou array para evitar bugs medonhos)
 
-	return VAOi;	// VAO (Vertex Array Object)	// i (interno à função - só para diferenciar do VAOe que está no main)
+	return VAO;	// VAO (Vertex Array Object)
 }
