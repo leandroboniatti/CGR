@@ -5,24 +5,32 @@ Ian Rossetti Boniatti - Curso Jogos Digitais
 Entrega da Lista 1 de Fundamentos de Computação Gráfica
 
 ## Parte 1 - Teoria
+
 1.
    a) O que é a GLSL?
    GLSL é uma Linguagem associada ao OpenGL, usada para criar shaders que manipulam vértices, pixels e calculam iluminação. Utilizada para programação gráfica em múltiplas plataformas, como Windows, Linux, MacOS,
 etc.
 
    b) Quais os dois tipos de shaders são obrigatórios no pipeline programável da versão atual que trabalhamos em aula e o que eles processam?
-   
 
-   
+   - Vertex Shader: etapa do pipeline gráfico que processa cada vértice individualmente, mas de forma paralelizada na GPU, e que deve ser programada (VertexShaderSource). Processa (pode alterar) os atributos dos vertices para estes serem usados nas próximas etapas do pipeline. 
+  
+   - Fragment Shader: O fragment shader processa em paralelo cada fragmento individual após a rasterização. A entrada do fragment shader é o conjunto de atributos definidos pelo usuário na saída do vertex shader. A saída do fragment shader geralmente é um atributo de cor em formato RGBA a ser aplicado ao pixel.
+  
+
 2.
    a) O que são primitivas gráficas?
-
+     São elementos básicos dos desenhos a partir dos quais são construídos outros objetos mais complexos. É a geometria básica a ser processada através de um arranjo ordenado de vértices.
 
    b) Como fazemos o armazenamento dos vértices na OpenGL?
+     Armazenamos os vértices (conjunto de atributos dos vertices) em buffers (VBO).
   
 
 3. Explique o que é VBO e VAO, e como se relacionam (se achar mais fácil, pode fazer um gráfico representando a relação entre eles).
 
+   VBO - Vertex Buffer Object: local da memória do pipeline gráfico onde estão armazenados os vertices (seus atributos) a serem usados pelas primitivas.
+
+   VAO - Vertex Array Object: local da memória do pipeline gráfico onde estarão armazenadas as referências (pointer) para os atributos dos vertices e as características destes atributos (quantidade de valores do atributo, tipo do dado, se está normalizado (entre zero e um), Tamanho em bytes do atributo e o deslocamento do atributo no VBO (a partir do zero).
 
   
 4. Analise o código fonte do projeto Hello Triangle. Localize e relacione os conceitos de shaders, VBOs e VAO apresentados até então. Não precisa entregar nada neste exercício.
