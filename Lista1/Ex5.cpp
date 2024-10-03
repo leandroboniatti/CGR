@@ -30,7 +30,7 @@ int setupGeometry();	// Protótipo da função responsável pela criação do VB
 
 /*** Constantes	***/
 
-const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela (pode ser alterado em tempo de execução)
+const GLuint WIDTH = 400, HEIGHT = 400;	// Dimensões da janela (pode ser alterado em tempo de execução)
 
 const GLchar* vertexShaderSource = "#version 400\n"		// Código fonte do Vertex Shader (em GLSL - Graphics Library Shading Language)
 "layout (location = 0) in vec3 position;\n"	// "position" recebe as informações que estão no local 0 -> definidas no setupGeometry() -> glVertexAttribPointer(0, xxxxxxxx);

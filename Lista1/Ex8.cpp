@@ -1,11 +1,8 @@
-/* Hello Triangle - código adaptado de https://learnopengl.com/#!Getting-started/Hello-Triangle 
- *
- * Adaptado por Rossana Baptista Queiroz
- * para a disciplina de Processamento Gráfico - Unisinos
- * Versão inicial: 7/4/2017
- * Última atualização em 13/08/2024
- *
- */
+/*** Hello Triangle ***/
+/*** Disciplina de Computação Gráfica - Jogos Digitais - Unisinos ***/
+/*** Aluno: Ian Rossetti Boniatti ***/
+/*** Código adaptado da adaptaçao de Rossana Baptista Queiroz de https://learnopengl.com/#!Getting-started/Hello-Triangle ***/
+
 
 #include <iostream>
 #include <string>
@@ -38,7 +35,6 @@ const GLchar* vertexShaderSource = "#version 400\n"
 "out vec3 vertexColor;\n"
 "void main()\n"
 "{\n"
-//...pode ter mais linhas de código aqui!
 "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
 "vertexColor = color;\n"
 "}\0";
@@ -72,7 +68,7 @@ int main()
 //#endif
 
 	// Criação da janela GLFW
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Ola Triangulo! -- Rossana", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Ola Triangulo! -- Ian R. Boniatti", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Fazendo o registro da função de callback para a janela GLFW
@@ -122,14 +118,14 @@ int main()
 
 		// Chamada de desenho - drawcall
 		// Poligono Preenchido - GL_TRIANGLES
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		
 		//Desenho com contorno (linhas)
 		glDrawArrays(GL_LINE_LOOP, 0, 3); //Desenha T0
-		glDrawArrays(GL_LINE_LOOP, 3, 3); //Desenha T1
+		//glDrawArrays(GL_LINE_LOOP, 3, 3); //Desenha T1
 
 		//Desenho só dos pontos (vértices)
-		glDrawArrays(GL_POINTS, 0, 6); 
+		glDrawArrays(GL_POINTS, 0, 3); 
 
 		glBindVertexArray(0); //Desconectando o buffer de geometria
 
@@ -233,10 +229,12 @@ int setupGeometry()
 
 	//Geração do identificador do VAO (Vertex Array Object)
 	glGenVertexArrays(1, &VAO);
+
 	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vértices
 	// e os ponteiros para os atributos 
 	glBindVertexArray(VAO);
-	//Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando: 
+
+	// Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando: 
 	// Localização no shader * (a localização dos atributos devem ser correspondentes no layout especificado no vertex shader)
 	// Numero de valores que o atributo tem (por ex, 3 coordenadas xyz) 
 	// Tipo do dado

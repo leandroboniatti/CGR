@@ -101,7 +101,7 @@ int main() {
 		glfwPollEvents();	// Checa se houveram eventos de input (key pressed, mouse moved etc.) e chama as funções de callback correspondentes
 
 		// Limpa o buffer de cor
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // define a cor de fundo - % normalizado, definido de 0.0 a 1.0 -> glClearColor(%RED, %GREEN, %BLUE, %ALPHA);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // define a cor de fundo - % normalizado, definido de 0.0 a 1.0 -> glClearColor(%RED, %GREEN, %BLUE, %ALPHA);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glLineWidth(10);	// o espessura padrão da linha é 1 pixel - alterado para....
@@ -112,20 +112,29 @@ int main() {
 		
 		/*** chamadas de desenho = drawcalls ***/
 
-		// Poligono (Triangulo) totalmente Preenchido
 		glUniform4f(colorLoc, 1.0f, 0.0f, 0.0f, 1.0f); //enviando cor do objeto para variável uniform chamada "inputColor" -> glUniform4f(%RED, %GREEN, %BLUE, %ALPHA);
-		glDrawArrays(GL_TRIANGLES, 0, 3);	
-	
-		glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 1.0f); //enviando cor do objeto para variável uniform chamada "inputColor" -> glUniform4f(%RED, %GREEN, %BLUE, %ALPHA);
-		glDrawArrays(GL_QUADS, 1, 4);
+		glDrawArrays(GL_TRIANGLES, 0, 3);	// Telhado
+		
+		glUniform4f(colorLoc, 0.45f, 0.28f, 0.21f, 1.0f); 
+		glDrawArrays(GL_TRIANGLE_FAN, 7, 4);	// Porta
 
-		//glUniform4f(colorLoc, 142/255, 35/255, 107/255, 1.0f); //enviando cor do objeto para variável uniform chamada "inputColor" -> glUniform4f(%RED, %GREEN, %BLUE, %ALPHA);
-		//glDrawArrays(GL_QUADS, 7, 4);
-											
-		//Desenho com contorno (linhas)
-		glUniform4f(colorLoc, 0.0f, 0.0f, 1.0f, 1.0f); //enviando NOVA cor para variável uniform inputColor
-		glDrawArrays(GL_LINE_LOOP, 0, 3); //Desenha T0
-		glDrawArrays(GL_LINE_LOOP, 3, 3); //Desenha T1
+		glUniform4f(colorLoc, 0.97f, 0.83f, 0.15f, 1.0f); 
+		glDrawArrays(GL_TRIANGLE_FAN,11, 4);	// Janela
+
+
+		// Desenho do contorno (linhas)
+		glUniform4f(colorLoc, 0.0f, 0.0f, 0.0f, 1.0f);
+		glDrawArrays(GL_LINE_LOOP, 0, 3);	// Telhado
+		glDrawArrays(GL_LINE_LOOP, 3, 4);	// Parede
+		glDrawArrays(GL_LINE_LOOP, 7, 4);	// Porta
+		glDrawArrays(GL_LINE_LOOP,11, 4);	// janela
+		glDrawArrays(GL_LINES, 15, 2);	// janela
+		glDrawArrays(GL_LINES, 17, 2);	// janela
+
+		glUniform4f(colorLoc, 1.0f, 0.64f, 0.0f, 1.0f); 
+		glDrawArrays(GL_LINES, 19, 2);
+
+
 
 		//Desenho só dos pontos (vértices)
 		//glUniform4f(colorLoc, 1.0f, 1.0f, 0.0f, 1.0f); //enviando NOVA cor para variável uniform inputColor
@@ -217,28 +226,35 @@ int setupGeometry() {
 	// Cada atributo do vértice (coordenada, cores, coordenadas de textura, normal, etc) pode ser arazenado em um VBO único ou em VBOs separados
 	GLfloat vertices[] = {
 	//      x     y    z
-	//T0
+	//Telhado
 		-0.4,  0.4, 0.0, // v0 (Vértice 0 do Triângulo 0)
 		 0.4,  0.4, 0.0, // v1 (Vértice 1 do Triângulo 0)
  		 0.0,  0.8, 0.0, // v2 (Vértice 2 do Triângulo 0)
 
-	//Q1
+	//parede
 		-0.4, -0.6, 0.0, // v0 (Vértice 0 do Quadrilatero 1)
 		 0.4, -0.6, 0.0, // v1 (Vértice 1 do Quadrilatero 1)
  		 0.4,  0.4, 0.0, // v2 (Vértice 2 do Quadrilatero 1)
 		-0.4,  0.4, 0.0, // v4 (Vértice 3 do Quadrilatero 1)
 
-	//Q2
+	//Porta
 		-0.1, -0.6, 0.0, // v0 (Vértice 0 do Quadrilatero 2)
 		 0.1, -0.6, 0.0, // v1 (Vértice 1 do Quadrilatero 2)
- 		-0.1, -0.3, 0.0, // v2 (Vértice 2 do Quadrilatero 2)
-		 0.1, -0.3, 0.0, // v4 (Vértice 3 do Quadrilatero 2)		  
+ 		 0.1, -0.1, 0.0, // v2 (Vértice 2 do Quadrilatero 2)
+		-0.1, -0.1, 0.0, // v4 (Vértice 3 do Quadrilatero 2)		  
 
-	//Q3
-		-0.3,  0.1, 0.0, // v0 (Vértice 0 do Quadrilatero 2)
-		-0.1,  0.1, 0.0, // v1 (Vértice 1 do Quadrilatero 2)
- 		-0.1,  0.3, 0.0, // v2 (Vértice 2 do Quadrilatero 2)
-		-0.3,  0.3, 0.0, // v4 (Vértice 3 do Quadrilatero 2)
+	//Janela
+		-0.3,  0.0, 0.0, // v0 (Vértice 0 do Quadrilatero 2)
+		-0.1,  0.0, 0.0, // v1 (Vértice 1 do Quadrilatero 2)
+ 		-0.1,  0.2, 0.0, // v2 (Vértice 2 do Quadrilatero 2)
+		-0.3,  0.2, 0.0, // v4 (Vértice 3 do Quadrilatero 2)
+		-0.3,  0.1, 0.0,
+		-0.1,  0.1, 0.0,
+		-0.2,  0.1, 0.0,
+		-0.2,  0.2, 0.0,
+	//Chão
+		-1.0, -0.6, 0.0, // v0 (Vértice 0 do Quadrilatero 2)
+		 1.0, -0.6, 0.0, // v1 (Vértice 1 do Quadrilatero 2)	
 	};
 
 	GLuint VBO, VAO;

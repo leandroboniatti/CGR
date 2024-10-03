@@ -56,19 +56,21 @@ int createPoligno(int verticesExternos, float anguloInicial, float anguloFinal, 
 
 int createEstrela(int numeroPontos, float raioMinimo, float raioMaximo);
 
+int createEspiral(int numeroPontos, float anguloInicial, float anguloFinal, float raioMinimo, float raioMaximo);
+
 
 /*** Função MAIN ***/
 int main() {
 
 	// 	Parâmetros para exerc. 6 a,b,c,d	//	Círculo	 |	Octagno	 |	Pentagno  |  PacMan  |  FatiaPizz  | Estrela
-	int verticesExternos =     10;	 		//     60   		8			 5		    60		    60		    10
-	float anguloInicial  =     330; 		// 	    0		    0		     0		    30		   330
-	float anguloFinal	 =     30; 	  		// 	  360		   360		    360		   330		    30
+	int verticesExternos =    100;	 		//     60   		8			 5		    60		    60		    10
+	float anguloInicial  =     0; 		    // 	    0		    0		     0		    30		   330
+	float anguloFinal	 =  1440; 	  		// 	  360		   360		    360		   330		    30
 	int deslocaContorno  =	   0;			//		1			1			 1			 0			 0 					// Deslocamento a partir do byte zero para o traço
 
-	bool desenhaInterior = 1;	// 0 = false	1 = true
+	bool desenhaInterior = 0;	// 0 = false	1 = true
 	bool desenhaContorno = 1;
-	bool desenhaPontos   = 1;
+	bool desenhaPontos   = 0;
 
 	glfwInit();	// Inicialização da GLFW
 
@@ -118,8 +120,9 @@ int main() {
 
 	//VAO = createPoligno(verticesExternos, anguloInicial, anguloFinal);	// exerc. 6 a,b,c,d
 
-	VAO = createEstrela(verticesExternos, 0.10, 0.90);	// exerc. 6 e
+	//VAO = createEstrela(verticesExternos, 0.10, 0.90);	// exerc. 6 e
 
+	VAO = createEspiral(verticesExternos, anguloInicial, anguloFinal, 0.10, 0.90);	// exerc. 7
 	
 	// Neste código, para enviar a cor desejada para o fragment shader, utilizamos variável do tipo uniform (um vec4) já que a informação não estará nos buffers
 	glUseProgram(shaderID);
@@ -149,7 +152,7 @@ int main() {
 		//Desenho com contorno (linhas)
 		if (desenhaContorno) {
 			glUniform4f(colorLoc, 0.0f, 0.0f, 1.0f, 1.0f); //enviando NOVA cor para variável uniform inputColor
-			glDrawArrays(GL_LINE_LOOP, deslocaContorno, verticesExternos + 1);
+			glDrawArrays(GL_LINE_STRIP, deslocaContorno, verticesExternos + 1);
 		}
 
 		//Desenho só dos pontos (vértices + centro)
@@ -397,6 +400,72 @@ int createEstrela(int numeroPontos, float raioMinimo, float raioMaximo) {
 		vertices.push_back(z); // z
 
 		angulo = angulo + intervalo;
+	}
+
+	//Configuração dos buffer VBO e VAO
+	GLuint VBO, VAO;
+	//Geração do identificador do VBO
+	glGenBuffers(1, &VBO);
+	//Faz a conexão (vincula) do buffer como um buffer de array
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//Envia os dados do array de floats para o buffer da OpenGl
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+
+	//Geração do identificador do VAO (Vertex Array Object)
+	glGenVertexArrays(1, &VAO);
+	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vértices
+	// e os ponteiros para os atributos 
+	glBindVertexArray(VAO);
+	//Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando: 
+	// Localização no shader * (a localização dos atributos devem ser correspondentes no layout especificado no vertex shader)
+	// Numero de valores que o atributo tem (por ex, 3 coordenadas xyz) 
+	// Tipo do dado
+	// Se está normalizado (entre zero e um)
+	// Tamanho em bytes 
+	// Deslocamento a partir do byte zero 
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	// Observe que isso é permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vértice 
+	// atualmente vinculado - para que depois possamos desvincular com segurança
+	glBindBuffer(GL_ARRAY_BUFFER, 0); 
+
+	// Desvincula o VAO (é uma boa prática desvincular qualquer buffer ou array para evitar bugs medonhos)
+	glBindVertexArray(0); 
+
+	return VAO;
+}
+
+
+int createEspiral(int numeroPontos, float anguloInicial, float anguloFinal, float raioMinimo, float raioMaximo) {
+
+	vector <GLfloat> vertices;
+
+	float angulo = 0.0;
+
+	float intervaloAngular = ((anguloFinal - anguloInicial) / (float)(numeroPontos-1)) * 2 * Pi / 360;
+
+	float intervaloRadial = (raioMaximo - raioMinimo) / (float)numeroPontos;
+
+	float raio = raioMinimo;
+
+	//Adicionando o ponto da origem (0.0,0.0,0.0) como sendo o centro do círculo
+	vertices.push_back(0.0); // Xc
+	vertices.push_back(0.0); // Yc
+	vertices.push_back(0.0); // Zc
+
+	for (int i = 0; i < numeroPontos; i++)
+	{
+		float x = raio * cos(angulo);
+		float y = raio * sin(angulo);
+		float z = 0.0;
+
+		vertices.push_back(x); // x
+		vertices.push_back(y); // y
+		vertices.push_back(z); // z
+
+		angulo = angulo + intervaloAngular;
+		raio = raio + intervaloRadial;
 	}
 
 	//Configuração dos buffer VBO e VAO
