@@ -44,11 +44,40 @@ etc.
 
 
 
+6. Faça o desenho de um círculo na tela, utilizando a equação paramétrica do círculo para gerar os vértices.
+
+   ![{60B04DD6-E800-465A-BCEC-EC31B41ABB24}](https://github.com/user-attachments/assets/5a79a819-2e57-4390-a091-17fde12a8068)
+
+   a. ![{A8125FB8-6AFC-482A-A14E-22E92B9869FD}](https://github.com/user-attachments/assets/e27a59a5-a010-413e-866c-71e2485d14de)
+
+   b. ![{26D90F44-DC7D-479E-B3F6-172FE10BB2BD}](https://github.com/user-attachments/assets/d5869536-fb2c-484f-b88c-83bc0207cecf)
+
+   c. ![{6D07F414-E7BD-4ED9-A0B4-CBDB589C8109}](https://github.com/user-attachments/assets/1cc81832-97b0-4844-ba6e-72908680449f)
+
+   d. ![{59047D45-8092-4042-AD60-8FAB028EA85D}](https://github.com/user-attachments/assets/390c6219-ee4f-44e5-8395-3edcb1852c0f)
+
+   e. ![{54FF709D-F41E-459B-A3D8-9345AADD1691}](https://github.com/user-attachments/assets/99bad192-20e5-47c9-b67e-905ba705374e)
+
+
+7. Desenhe uma espiral.
+
+   ![{4DD86853-7202-4C20-970D-1D8218E6E1FB}](https://github.com/user-attachments/assets/329e940a-da80-4060-b08a-8b3225fe3a4c)
+
+
+8. Considerando o seguinte triângulo abaixo, formado pelos vértices P1, P2 e P3, respectivamente com as cores vermelho, verde e azul:
+
+   a. Vertex Shader:    - definisse a varíavel de entrada "color" dos tipos "vec3" e "in" que vai receber os dados da "location=1" do VAO (cores dos vertices);
+                        - definisse a variável de saída "vertexColor" dos tipos "vec3" e "out" que vai enviar as cores para os próximos estagios do pipeline;
+
+      Fragment Shader:  - definisse a varíavel de entrada "vertexColor" dos tipos "vec3" e "in" que vai receber os dados da "location=1" do VAO oriundos do pipeline e substituindo a varíavel uniform usada antes ("inputColor");
+
+      setupGeometry():   - temos um VBO com dois atributos
+
+
+   definesse a "location 1" sendo que
 
 
 
-
-7. Faça o desenho de um círculo na tela, utilizando a equação paramétrica do círculo para gerar os vértices. Depois disso:
 
 
 
