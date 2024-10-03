@@ -77,6 +77,8 @@ etc.
 ![{CFE6E083-F87C-4BEC-867B-F781827FD017}](https://github.com/user-attachments/assets/9fecbbf9-fa85-4cd7-9bab-1b3c7e526f63)
 
 
+9. Faça um desenho em um papel quadriculado (pode ser no computador mesmo) e reproduza-o utilizando primitivas em OpenGL. Neste exercício você poderá criar mais de um VAO e fazer mais de uma chamada de desenho para poder utilizar primitivas diferentes, se necessário.
+
 
 
 
