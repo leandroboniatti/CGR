@@ -66,16 +66,15 @@ etc.
 
 8. Considerando o seguinte triângulo abaixo, formado pelos vértices P1, P2 e P3, respectivamente com as cores vermelho, verde e azul:
 
-   a. Vertex Shader:    - definisse a varíavel de entrada "color" dos tipos "vec3" e "in" que vai receber os dados da "location=1" do VAO (cores dos vertices);
+   a. setupGeometry():   - configurasse um VBO com dois atributos (Posição e Cor) e, a partir desse, definisse o VAO com duas locations (0-Posição e 1-Cor).
+
+   b. Vertex Shader:    - definisse a varíavel de entrada "position" dos tipos "vec3" e "in" que vai receber os dados da "location=0" do VAO (posição dos vertices);
+                        - definisse a varíavel de entrada "color" dos tipos "vec3" e "in" que vai receber os dados da "location=1" do VAO (cores dos vertices);
                         - definisse a variável de saída "vertexColor" dos tipos "vec3" e "out" que vai enviar as cores para os próximos estagios do pipeline;
 
       Fragment Shader:  - definisse a varíavel de entrada "vertexColor" dos tipos "vec3" e "in" que vai receber os dados da "location=1" do VAO oriundos do pipeline e substituindo a varíavel uniform usada antes ("inputColor");
 
-      setupGeometry():   - temos um VBO com dois atributos
-
-
-   definesse a "location 1" sendo que
-
+![{CFE6E083-F87C-4BEC-867B-F781827FD017}](https://github.com/user-attachments/assets/9fecbbf9-fa85-4cd7-9bab-1b3c7e526f63)
 
 
 
