@@ -12,7 +12,8 @@ Entrega da Lista 2 de Fundamentos de Computação Gráfica
 
 
 2.
-  
+  ![{B1BD46B1-F925-4631-A4FD-D97CF647B72A}](https://github.com/user-attachments/assets/c9cc783c-253e-4129-b9d1-76fea3c4d0d9)
+
 
 3.
 
