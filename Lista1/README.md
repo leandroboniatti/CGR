@@ -64,7 +64,8 @@ etc.
 
    d. ![{59047D45-8092-4042-AD60-8FAB028EA85D}](https://github.com/user-attachments/assets/390c6219-ee4f-44e5-8395-3edcb1852c0f)
 
-   e. ![{54FF709D-F41E-459B-A3D8-9345AADD1691}](https://github.com/user-attachments/assets/99bad192-20e5-47c9-b67e-905ba705374e)
+   e. ![{F0E682B5-DD19-4FFE-AE79-854594AA2247}](https://github.com/user-attachments/assets/2fb0e6a8-479a-49ea-9b2a-1f99ebb5c073)
+
 
 
 7. Desenhe uma espiral.
