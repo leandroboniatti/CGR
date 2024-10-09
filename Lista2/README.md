@@ -8,7 +8,8 @@ Entrega da Lista 2 de Fundamentos de Computação Gráfica
 	mat4 projection = ortho(0.0, 800.0, 0.0, 600.0, -1.0, 1.0);  	// ortho(Left, Right, Bottom, Top, Near, Far)
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, value_ptr(projection));
 
-    ![alt text]({7DBB08CD-477C-4EC4-A153-422CD8F03EE9}.png)
+![{7DBB08CD-477C-4EC4-A153-422CD8F03EE9}](https://github.com/user-attachments/assets/c22351b3-cd0c-4f48-9e13-aac36f743037)
+
 
 2.
   
