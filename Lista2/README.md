@@ -4,7 +4,11 @@ Ian Rossetti Boniatti - Curso Jogos Digitais
 
 Entrega da Lista 2 de Fundamentos de Computação Gráfica
 
-1.
+1. //Matriz de projeção paralela ortográfica
+	mat4 projection = ortho(0.0, 800.0, 0.0, 600.0, -1.0, 1.0);  	// ortho(Left, Right, Bottom, Top, Near, Far)
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, value_ptr(projection));
+
+    ![alt text]({7DBB08CD-477C-4EC4-A153-422CD8F03EE9}.png)
 
 2.
   
