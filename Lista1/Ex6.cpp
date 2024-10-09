@@ -62,13 +62,13 @@ int main() {
 
 	// 	Parâmetros para exerc. 6 a,b,c,d	//	Círculo	 |	Octagno	 |	Pentagno  |  PacMan  |  FatiaPizz  | Estrela
 	int verticesExternos =     10;	 		//     60   		8			 5		    60		    60		    10
-	float anguloInicial  =     330; 		// 	    0		    0		     0		    30		   330
-	float anguloFinal	 =     30; 	  		// 	  360		   360		    360		   330		    30
-	int deslocaContorno  =	   0;			//		1			1			 1			 0			 0 					// Deslocamento a partir do byte zero para o traço
+	float anguloInicial  =    330;  		// 	    0		    0		     0		    30		   330			 -
+	float anguloFinal	 =     30; 	  		// 	  360		   360		    360		   330		    30			 -
+	int deslocaContorno  =	    1;			//		1			1			 1			 0			 0 			 1		// Deslocamento a partir do byte zero para o traço
 
-	bool desenhaInterior = 1;	// 0 = false	1 = true
+	bool desenhaInterior = 0;	// 0 = false	1 = true
 	bool desenhaContorno = 1;
-	bool desenhaPontos   = 1;
+	bool desenhaPontos   = 0;
 
 	glfwInit();	// Inicialização da GLFW
 
@@ -118,7 +118,7 @@ int main() {
 
 	//VAO = createPoligno(verticesExternos, anguloInicial, anguloFinal);	// exerc. 6 a,b,c,d
 
-	VAO = createEstrela(verticesExternos, 0.10, 0.90);	// exerc. 6 e
+	VAO = createEstrela(verticesExternos, 0.20, 0.80);	// exerc. 6 e
 
 	
 	// Neste código, para enviar a cor desejada para o fragment shader, utilizamos variável do tipo uniform (um vec4) já que a informação não estará nos buffers
@@ -383,7 +383,7 @@ int createEstrela(int numeroPontos, float raioMinimo, float raioMaximo) {
 	vertices.push_back(0.0); // Yc
 	vertices.push_back(0.0); // Zc
 
-	for (int i = 1; i < numeroPontos+1; i++)
+	for (int i = 1; i < numeroPontos+2; i++)
 	{
 		if (i % 2 == 0) raio = raioMaximo;
 		else raio = raioMinimo;
