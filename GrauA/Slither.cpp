@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <vector>
 #include <assert.h>
 
 #include <glad/glad.h> 	// biblioteca de funções baseada nas definições/especificações OPENGL
@@ -23,9 +24,6 @@ using namespace std;	// Para não precisar digitar std:: na frente de comandos d
 using namespace glm;	// Para não precisar digitar glm:: na frente de comandos da biblioteca
 
 
-enum directions {NONE, UP, DOWN, LEFT, RIGHT};
-
-
 /*** Protótipos das funções ***/
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode); // Protótipo da função de callback de teclado
@@ -34,10 +32,14 @@ int setupShader();		// Protótipo da função responsápasso pela compilação e
 
 int setupGeometry();	// Protótipo da função responsápasso pela criação do VBO e do VAO
 
+int createPoligno(int verticesExternos, float anguloInicial, float anguloFinal, float raio = 0.5);
+
 void aplicaTransformacoes(GLuint shaderID, GLuint VAO, vec3 posicaoNaTela, float anguloDeRotacao, vec3 escala, vec3 color, vec3 eixoDeRotacao = (vec3(0.0, 0.0, 1.0)));
 
 
 /*** Constantes	***/
+
+const float Pi = 3.14159;
 
 const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela (pode ser alterado em tempo de execução)
 
@@ -60,6 +62,8 @@ const GLchar* fragmentShaderSource = "#version 400\n"	//Código fonte do Fragmen
 "color = inputColor;\n"
 "}\0";
 
+enum directions {NONE, UP, DOWN, LEFT, RIGHT};
+
 
 /*** Variáveis Globais	***/
 
@@ -68,6 +72,16 @@ bool keys [1024];
 
 /*** Função MAIN ***/
 int main() {
+
+// 	Parâmetros para exerc. 6 a,b,c,d	//	Círculo	 |	Octagno	 |	Pentagno  |  PacMan  |  FatiaPizz  | Estrela
+	int verticesExternos =   60;	 	//     60   		8			 5		    60		    60		    10
+	float anguloInicial  =    0;  		// 	    0		    0		     0		    30		   330			 -
+	float anguloFinal	 =  360; 		// 	  360		   360		    360		   330		    30			 -
+	int deslocaContorno  =	  1;		//		1			1			 1			 0			 0 			 1		// Deslocamento a partir do byte zero para o traço
+
+	bool desenhaInterior = 1;	// 0 = false	1 = true
+	bool desenhaContorno = 0;
+	bool desenhaPontos   = 0;
 
 	glfwInit();	// Inicialização da GLFW
 
@@ -78,7 +92,7 @@ int main() {
 	//Sugestão: comente as 3 linhas de código anteriores para descobrir a versão suportada por sua placa e depois atualize (por exemplo: 4.5 com 4 e 5)
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //Essencial para computadores da Apple
 		
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Olá Triângulo! - Ian R. Boniatti", nullptr, nullptr);	// Criação da janela GLFW
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "SLITHER.IO - Ian R. Boniatti e Eduardo Tropea", nullptr, nullptr);	// Criação da janela GLFW
 	
 	glfwMakeContextCurrent(window);
 
@@ -103,7 +117,9 @@ int main() {
 
 	GLuint shaderID = setupShader(); 	// Compilando e montando o programa de shader (retorna o identificador OpenGL para o programa de shader)
 	
-	GLuint VAO = setupGeometry();		// Função para Gerar um buffer VAO simples com a geometria de um triângulo (retorna o identificador OpenGL para o VAO
+	//GLuint VAO = setupGeometry();		// Função para Gerar um buffer VAO simples com a geometria de um triângulo (retorna o identificador OpenGL para o VAO
+
+	GLuint VAO = createPoligno(verticesExternos, anguloInicial, anguloFinal);
 		
 	// Neste código, para enviar a cor desejada para o fragment shader, utilizamos variápasso do tipo uniform (um vec4) já que a informação não estará nos buffers
 	glUseProgram(shaderID);
@@ -142,8 +158,8 @@ int main() {
 
 		//glfwGetCursorPos(window, &cursorPosX, &cursorPosY);
 
-		aplicaTransformacoes(shaderID, VAO, posicaoNaTela, 0.0, vec3(100,100,1), vec3(1.0,0.0,0.0));
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		aplicaTransformacoes(shaderID, VAO, posicaoNaTela, 0.0, vec3(50,50,1), vec3(1.0,0.0,0.0));
+		glDrawArrays(GL_TRIANGLE_FAN, 0, verticesExternos + 2);
 
 
 		glBindVertexArray(0);	//Desconectando o buffer de geometria
@@ -258,6 +274,82 @@ int setupGeometry() {
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);	//Envia os dados do array de floats para o buffer da OpenGl
 
+
+	glGenVertexArrays(1, &VAO);	// Geração do identificador do VAO (Vertex Array Object)
+
+	// Vincula (bind) o VAO primeiro, e em seguida conecta e seta o(s) buffer(s) de vértices
+	// e os ponteiros para os atributos 
+	glBindVertexArray(VAO);
+
+	// Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando: 
+	// Localização no shader * (a localização dos atributos devem ser correspondentes no layout especificado no vertexShaderSource)
+	// Numero de valores que o atributo tem (por ex, 3 coordenadas xyz) 
+	// Tipo do dado
+	// Se está normalizado (entre zero e um)
+	// Tamanho em bytes 
+	// Deslocamento a partir do byte zero 
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	// Observe que isso é permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vértice 
+	// atualmente vinculado - para que depois possamos desvincular com segurança
+	glBindBuffer(GL_ARRAY_BUFFER, 0); 
+
+	glBindVertexArray(0); // Desvincula o VAO (é uma boa prática desvincular qualquer buffer ou array para evitar bugs medonhos)
+
+	return VAO;	// VAO (Vertex Array Object)	// i (interno à função - só para diferenciar do VAOe que está no main)
+}
+
+
+int createPoligno(int verticesExternos, float anguloInicial, float anguloFinal, float raio) {
+	
+	vector <GLfloat> vertices;
+
+	float intervalo;
+	float anguloAtual = anguloInicial;
+	float anguloAbertura = anguloFinal - anguloInicial;	
+
+	if (anguloAbertura == 360.0) {
+		intervalo = 360 / (float)(verticesExternos); 
+		anguloAtual = 0;
+		verticesExternos++;	// ??? precisamos +1 vertice externo = primeiro para fechar o poligno
+	}
+	else {
+		if (anguloAbertura < 0.0) {
+			intervalo = (anguloAbertura + 360) / (float)(verticesExternos-1);
+		}
+		else {		
+			intervalo = anguloAbertura / (float)(verticesExternos-1);
+		}
+	}
+
+	intervalo = intervalo * 2 * Pi / 360;
+	anguloAtual = anguloAtual * 2 * Pi / 360;
+
+	// adicionando o centro do circulo no vetor
+	vertices.push_back(0.0);	// Xc
+	vertices.push_back(0.0);	// Yc
+	vertices.push_back(0.0);	// Zc
+
+	for (int i = 1; i <= verticesExternos; i++)	{		
+		
+		vertices.push_back(raio * cos(anguloAtual));	// Xi
+		vertices.push_back(raio * sin(anguloAtual)); 	// Yi
+		vertices.push_back(0.0);						// Zi
+
+		anguloAtual = anguloAtual + intervalo;
+	}
+
+	/*** Configuração dos buffers VBO e VAO ***/
+	GLuint VBO, VAO;
+	
+	glGenBuffers(1, &VBO);	// Geração do identificador do VBO (Vertex Buffer Objects)
+	
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// Faz a conexão/vinculação do buffer como um buffer de array
+
+	
+	
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);	//Envia os dados do array de floats para o buffer da OpenGl
 
 	glGenVertexArrays(1, &VAO);	// Geração do identificador do VAO (Vertex Array Object)
 

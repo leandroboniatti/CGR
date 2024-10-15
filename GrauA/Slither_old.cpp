@@ -64,6 +64,7 @@ const GLchar* fragmentShaderSource = "#version 400\n"	//Código fonte do Fragmen
 
 enum directions {NONE, UP, DOWN, LEFT, RIGHT};
 
+
 /*** Variáveis Globais	***/
 
 bool keys [1024];
