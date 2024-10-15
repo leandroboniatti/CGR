@@ -12,7 +12,8 @@
                 "-I${workspaceFolder}/../Dependencies/GLAD/include", //GLAD
                 "-I${workspaceFolder}/../Dependencies/glfw-3.4.bin.WIN64/include", //GLFW
                 "-I${workspaceFolder}/../Dependencies/glm", //GLM
-                "${file}",
+                //"${file}",
+                "${workspaceFolder}\\*.cpp",
                 // Aqui você inclui o caminho para os outros arquivos .c ou .cpp
                 "${workspaceFolder}/glad.c",  //GLAD
                 "-o",
