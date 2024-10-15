@@ -73,16 +73,11 @@ bool keys [1024];
 /*** Função MAIN ***/
 int main() {
 
-// 	Parâmetros para exerc. 6 a,b,c,d	//	Círculo	 |	Octagno	 |	Pentagno  |  PacMan  |  FatiaPizz  | Estrela
+// 	Parâmetros para o Círculo
 	int verticesExternos =   60;	 	//     60   		8			 5		    60		    60		    10
 	float anguloInicial  =    0;  		// 	    0		    0		     0		    30		   330			 -
 	float anguloFinal	 =  360; 		// 	  360		   360		    360		   330		    30			 -
-	int deslocaContorno  =	  1;		//		1			1			 1			 0			 0 			 1		// Deslocamento a partir do byte zero para o traço
-
-	bool desenhaInterior = 1;	// 0 = false	1 = true
-	bool desenhaContorno = 0;
-	bool desenhaPontos   = 0;
-
+	
 	glfwInit();	// Inicialização da GLFW
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);		// Informa a versão do OpenGL a partir da qual o código funcionará			
@@ -346,8 +341,6 @@ int createPoligno(int verticesExternos, float anguloInicial, float anguloFinal, 
 	glGenBuffers(1, &VBO);	// Geração do identificador do VBO (Vertex Buffer Objects)
 	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// Faz a conexão/vinculação do buffer como um buffer de array
-
-	
 	
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);	//Envia os dados do array de floats para o buffer da OpenGl
 
