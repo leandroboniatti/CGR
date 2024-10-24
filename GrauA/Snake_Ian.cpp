@@ -77,6 +77,77 @@ vector <Geometry> snake;	// Vetor que armazena todos os segmentos da snake, incl
 //vec3 dir2Mouse = vec3(0.0, -1.0, 0.0); // Vetor direção da snake[0] para o mouse
 
 
+//Tentativa colisao e crescimento IAN
+// Estrutura para representar uma semente
+struct Seed {
+    glm::vec2 position;
+    float size; // Tamanho da semente (raio se circular ou lado se quadrado)
+};
+
+// Estrutura para representar um segmento da cobrinha
+struct SnakeSegment {
+    glm::vec2 position;
+};
+
+// Estrutura para a cobrinha
+class Snake {
+public:
+    std::vector<SnakeSegment> segments;
+    float segmentSize;
+
+    Snake(glm::vec2 initialPosition, float size) {
+        segmentSize = size;
+        segments.push_back({ initialPosition }); // Cria a cabeça da cobrinha
+    }
+
+    // Função para crescer a cobrinha
+    void grow() {
+        // Adiciona um segmento na posição do último segmento (ou com uma lógica de posicionamento)
+        SnakeSegment newSegment = segments.back();
+        segments.push_back(newSegment);
+    }
+
+    // Verifica colisão entre a cabeça da cobrinha e uma semente
+    bool checkCollision(const Seed& seed) {
+        glm::vec2 headPosition = segments[0].position;
+        float distance = glm::distance(headPosition, seed.position);
+        
+        // Verifica se a distância é menor que a soma dos tamanhos (hitbox circular)
+        return distance < (segmentSize / 2.0f + seed.size / 2.0f);
+    }
+
+    // Atualiza a posição dos segmentos da cobrinha
+    void updateSegments() {
+        for (size_t i = segments.size() - 1; i > 0; --i) {
+            // Cada segmento segue o segmento à frente
+            segments[i].position = segments[i - 1].position;
+        }
+    }
+
+    // Movimenta a cabeça da cobrinha para uma nova posição
+    void move(glm::vec2 newPosition) {
+        updateSegments();
+        segments[0].position = newPosition;
+    }
+};
+
+// Função para gerar uma nova semente em uma posição aleatória
+Seed generateSeed(float mapWidth, float mapHeight, float seedSize) {
+    Seed seed;
+    seed.position = glm::vec2(
+        static_cast<float>(rand()) / RAND_MAX * mapWidth,
+        static_cast<float>(rand()) / RAND_MAX * mapHeight
+    );
+    seed.size = seedSize;
+    return seed;
+}
+
+bool checkCollision(float x1, float y1, float x2, float y2, float size) {
+    return (x1 < x2 + size && x1 + size > x2 && y1 < y2 + size && y1 + size > y2);
+}
+
+
+
 /*** Função MAIN ***/
 int main() {
 
@@ -93,6 +164,10 @@ int main() {
 
 	// GLAD: carrega todos os ponteiros de funções da OpenGL
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { cout << "Failed to initialize GLAD" << std::endl; }
+
+
+	//Tentativa Seed IAN
+	 Seed seed = generateSeed(1.0f, 1.0f, 0.05f);
 
 
 	// Obtendo as informações de versão da placa de vídeo
@@ -133,13 +208,13 @@ int main() {
 	eyes.cor = vec3(0, 0, 0);	// Preto
 
 
-	Geometry seed;
+	/*Geometry seed;
 	seed.VAO = createSeed ();
 	seed.posAtual = vec3(100, 100, 0);
 	seed.dimensao = vec3(seedDim, 1.0);
 	seed.angulo = radians(45.0f);
 	seed.cor = vec3(0, 1, 0);	// Verde
-
+	*/
 
 	bool colidiu = false;
 
@@ -150,7 +225,18 @@ int main() {
 
 		Geometry head = snake[0];
 
-		if (head.posAtual.x > seed.posAtual.x) {
+
+		//Tentativa IAN
+		if (snake.checkCollision(seed)) {
+            // Se colisão detectada, crescer a cobrinha
+            snake.createCircle();
+
+            // Gerar uma nova semente em uma posição aleatória
+            seed = generateSeed(1.0f, 1.0f, 0.05f);
+        }
+
+
+		/*if (head.posAtual.x > seed.posAtual.x) {
 			if ((seed.posAtual.x + seed.dimensao.x) >= (head.posAtual.x - head.dimensao.x)) {colidiu = true;}
 		} 
 		else if (head.posAtual.x < seed.posAtual.x) {
@@ -162,10 +248,10 @@ int main() {
 		} 
 		else if (head.posAtual.y < seed.posAtual.y) {
 			if ((seed.posAtual.y - seed.dimensao.y) <= (head.posAtual.y + head.dimensao.y)) {colidiu = true;}
-		}
+		}*/
 
 
-		if (colidiu) { snake.push_back(createSegment(snake.size())); colidiu = false; seed.posAtual=vec3(700,500,0); }
+		//if (colidiu) { snake.push_back(createSegment(snake.size())); colidiu = false; seed.posAtual=vec3(700,500,0); }
 
 		// Limpa o buffer de cor	// Limpa a tela
 		glClearColor(0.3f, 0.3f, 0.3f, 1.0f); // define a cor de fundo = %RED, %GREEN, %BLUE, %ALPHA;
@@ -226,9 +312,9 @@ int main() {
 
 
 		// Desenha a semente
-		aplicaTransformacoes(shaderID, seed.VAO, seed.posAtual, seed.angulo, seed.dimensao, seed.cor);
+		/*aplicaTransformacoes(shaderID, seed.VAO, seed.posAtual, seed.angulo, seed.dimensao, seed.cor);
 		glDrawArrays(GL_TRIANGLE_FAN,   0, 4);
-
+		*/
 
 
 		glBindVertexArray(0);	//Desconectando o buffer de geometria
