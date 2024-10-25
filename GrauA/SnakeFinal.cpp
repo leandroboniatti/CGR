@@ -235,7 +235,7 @@ int main () {
 		glBindVertexArray(0);	//Desconectando o buffer de geometria
 		
 		glfwSwapBuffers(window);	// Troca os buffers da tela
-	}
+	} // fim do while
 	
 	for (int i = 0; i < snake.size() - 1; i++) { glDeleteVertexArrays(1, &snake[i].VAO); } // Pede pra OpenGL desalocar os buffers
 												 glDeleteVertexArrays(1, &eyes.VAO);
