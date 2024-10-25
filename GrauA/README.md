@@ -8,10 +8,12 @@ Entrega da cobrinha do Slither.io de Fundamentos de Computação Gráfica
    
    Ian Rossetti Boniatti e Eduardo Silva Tropea
 
-3. Instruções para executar o programa.
+2. Instruções para executar o programa.
+   
    Rodar o arquivo "SnakeFinal.cpp".
 
-4. Qualquer explicação adicional necessária sobre o funcionamento do código.
+3. Qualquer explicação adicional necessária sobre o funcionamento do código.
+
    
 
 
