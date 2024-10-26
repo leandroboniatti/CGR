@@ -14,6 +14,8 @@ Entrega da cobrinha do Slither.io de Fundamentos de Computação Gráfica
 
 3. Qualquer explicação adicional necessária sobre o funcionamento do código.
 
+   Se necessário, ajustar a velocidade em: "segmentFactor = ...f, headFactor = ...f;".
+   Em alguns computadores a velocidade varia, portanto pode ser necessário encontrar a velocidade ideal para sua máquina.
    
 
 
