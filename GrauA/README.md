@@ -16,8 +16,7 @@ Entrega da cobrinha do Slither.io de Fundamentos de Computação Gráfica
 
    Se necessário, ajustar a velocidade em: "segmentFactor = ...f, headFactor = ...f;".
    Em alguns computadores a velocidade varia, portanto pode ser necessário encontrar a velocidade ideal para sua máquina.
-   
 
-
-Sintaxe básica de gravação e formatação no GitHub:
-https://docs.github.com/pt/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax
+   no final do vídeo eu cometi um engano, achei que já tivesse falado sobre as funções "aplicaTrasformaçoes" quando falei dos protótipos e acabei não "abrindo" e explicando as funções. Mas basicamente, nós optamos por modificar a função que a senhora disponibilizou, "drawGeometry", para separar as transformações da chamada de desenho. No código, por exemplo, ficamos com:
+   aplicaTransformacoes(shaderID, snake[i]);
+   glDrawArrays(GL_TRIANGLE_FAN, 0, 34);
