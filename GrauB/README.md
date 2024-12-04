@@ -7,7 +7,7 @@
 
 2. Instruções para executar o programa.
    
-   Rodar o arquivo "GrauB.cpp". 
+   Rodar o arquivo "GrauB.cpp". Direcionar o personagem com setas direita (ou D) ou esquerda (ou A), coletando as moedas e desviando das bombas. Cada moeda coletada incrementa a pontuação. A cada cinco pontos incrementa uma vida e aumentamos a dificuldade através do incremento da velocidade dos itens. Cada colisão com bomba decresce uma vida. Número de vidas inicial = 5.
 
 
 3. Qualquer explicação adicional necessária sobre o funcionamento do código.
@@ -26,9 +26,11 @@
 
    bomb -> https://craftpix.net/freebies/free-40-loot-icons-pixel-art/?num=3&count=102&sq=coin&pos=9
    
+5. Exemplos de Saídas
 
-6. 
+![{04279D1C-67C5-4281-B511-C66058C3408A}](https://github.com/user-attachments/assets/1e4910a7-0bc4-47d5-9fe0-ca867288de20)
 
+![{CCCD20B3-E7B9-4764-A862-CC99FC9E0887}](https://github.com/user-attachments/assets/74885106-69b6-4812-8816-110798f3eff8)
 
 
 
