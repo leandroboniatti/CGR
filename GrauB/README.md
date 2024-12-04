@@ -1,8 +1,4 @@
-# Simulando a cobrinha do Slither.io de FundamentosCG
-
-Ian Rossetti Boniatti - Curso Jogos Digitais 
-
-Entrega da cobrinha do Slither.io de Fundamentos de Computação Gráfica
+# Desenvolvimento de um Jogo 2D com Sprites de FundamentosCG
 
 1. Nome completo dos integrantes.
    
@@ -10,13 +6,22 @@ Entrega da cobrinha do Slither.io de Fundamentos de Computação Gráfica
 
 2. Instruções para executar o programa.
    
-   Rodar o arquivo "SnakeFinal.cpp".
+   Rodar o arquivo "GrauB.cpp". 
 
 3. Qualquer explicação adicional necessária sobre o funcionamento do código.
 
-   Se necessário, ajustar a velocidade em: "segmentFactor = ...f, headFactor = ...f;".
+   Se necessário, ajustar as velocidades em: "velMax , velMin , velInc".
    Em alguns computadores a velocidade varia, portanto pode ser necessário encontrar a velocidade ideal para sua máquina.
 
-   no final do vídeo eu cometi um engano, achei que já tivesse falado sobre as funções "aplicaTrasformaçoes" quando falei dos protótipos e acabei não "abrindo" e explicando as funções. Mas basicamente, nós optamos por modificar a função que a senhora disponibilizou, "drawGeometry", para separar as transformações da chamada de desenho. No código, por exemplo, ficamos com:
-   aplicaTransformacoes(shaderID, snake[i]);
-   glDrawArrays(GL_TRIANGLE_FAN, 0, 34);
+4. Sprites utilizados foram baixados de craftpix.com e adaptados com PhotoShop
+   background -> https://craftpix.net/freebies/free-nature-backgrounds-pixel-art/?num=1&count=179&sq=background%20parallax&pos=15
+   character -> https://craftpix.net/freebies/free-pixel-art-tiny-hero-sprites/?num=1&count=201&sq=tiny%20hero&pos=5
+   coin -> https://craftpix.net/freebies/free-game-coins-sprite-sheets/?num=1&count=102&sq=coin&pos=6
+   bomb -> https://craftpix.net/freebies/free-40-loot-icons-pixel-art/?num=3&count=102&sq=coin&pos=9
+   
+
+6. 
+
+
+
+
