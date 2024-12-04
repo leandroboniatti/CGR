@@ -11,28 +11,22 @@
 #include <vector>
 #include <assert.h>
 #include <stb_image.h>
+
 #include <glad/glad.h> 	// biblioteca de funções baseada nas definições/especificações OPENGL - Incluir antes de outros que requerem OpenGL (como GLFW)
+
 #include <GLFW/glfw3.h> // biblioteca de funções para criação da janela no Windows e gerenciar entrada de teclado/mouse
+
 #include <glm/glm.hpp>	// biblioteca de operações matriciais
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 using namespace std;	// Para não precisar digitar std:: na frente de comandos da biblioteca
 using namespace glm;	// Para não precisar digitar glm:: na frente de comandos da biblioteca
-
-
-/*** Constantes	***/
-const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela
-const float velMax = 3.5f, velMin = 1.5f, velInc = 0.1f;
-const float FPS = 12.0f;
-const int numlives = 5;
-const int maxItems = 4;
-const int spriteSheetColuns = 6, spriteSheetLines = 3;	// quantidade de linhas e colunas do spritesheet utilizado
 
 
 /*** ENUMs e STRUCTs ***/
 // ENUM para definir sentido dado pela entrada de teclado
 enum sprites_states {IDLE = 1,MOVING_RIGHT,MOVING_LEFT}; // Inicializando IDLE em 1 os seguintes serão 2 e 3
-enum sprites_effect	{NONE,COLLECT,DENY};
 
 // Estrutura para armazenar informações sobre um determinado elemento Sprite
 struct Sprite {	
@@ -54,9 +48,8 @@ struct Sprite {
 	// movimentação do sprite
 	float vel;		 	//
 
-	// Para o cálculo da colisão (AABB - Axis Aligned Bounding Box) e efeito
-	vec2 PMax, PMin;
-	int effect;	// criado para informar se o sprite tipo item criará dano ou coleta ao colidir com o personagem
+	// Para o cálculo da colisão (AABB - Axis Aligned Bounding Box)
+	vec2 PMax, PMin; 	//
 };
 
 
@@ -70,7 +63,7 @@ void drawSprite (GLuint shaderID, Sprite &sprite);
 void updateSprite (GLuint shaderID, Sprite &sprite);
 void moveSprite (GLuint shaderID, Sprite &sprite);
 
-//void updateItems (GLuint shader, Sprite &sprite);
+void updateItems (GLuint shader, Sprite &sprite);
 void spawnItem (Sprite &sprite);	// função que gera (spawn) os itens em posições "x,y" aleatórias
 
 void calculateAABB (Sprite &sprite);
@@ -79,26 +72,31 @@ bool checkCollision (Sprite one, Sprite two);
 Sprite initializeSprite ( GLuint textureID,
 						  vec3 dimensions,
 						  vec3 position,
-						  int effect = NONE,	// criado para informar se o sprite tipo item criará dano ou coleta ao colidir
 						  int nAnimations = 1,
 						  int nFrames = 1,
-						  float vel = 1.5f,		// original = 1.5f
+						  float vel = 1.5f,	// original = 1.5f
 						  float angle = 0.0 );
+
+
+/*** Constantes	***/
+const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela
 
 
 /*** Variáveis Globais	***/
 bool keys[1024];	// para identificar as teclas pressionadas
 
-float velCharacter = velMin + 0.5;	// original = 1.5f	// era float velSprites = 1.5f;
-float velItems 	   = velMin;	// original = 1.5f
-
+float FPS = 12.0f;
+float velItems 	  = 1.5f;	// original = 1.5f
+float velMaxItens = 1.0f;
+float velSprites  = 1.5f;	// original = 1.5f
 float lastSpawnX = 400.0;	// posição "x" inicial de criação dos itens, acima da tela
 
 float lastTime = 0;
 
-int lives = numlives;
-
 int itemsTextureID[4];	// para guardar o ID das texturas de cada iten
+int lives = 5;
+int spriteSheetColuns = 6;
+int spriteSheetLines = 3;
 
 
 /*** Códigos fonte do Vertex Shader e do Fragment Shader -> deslocados para a função SetupShader() ***/
@@ -140,7 +138,7 @@ int main() {
 	glUseProgram(shaderID); // Informa qual programa de shader será usado, no caso -> shaderID
 
 	// Criação dos sprites - objetos da cena
-	Sprite background, character, coin, bomb;
+	Sprite background, character;
 	vector <Sprite> items;	// armazenamento dos itens
 
 	// Variáveis locais
@@ -154,24 +152,20 @@ int main() {
 
 	// Carregando a textura do personagem e armazenando seu id em "character"
 	textureID  = loadTexture("../Textures/Characters/Personagem.png", imgWidth, imgHeight);
-	character  = initializeSprite(textureID, vec3(imgWidth * 3.0, imgHeight * 3.0, 1.0), vec3(400, 100, 0), NONE, spriteSheetLines, spriteSheetColuns, velCharacter);
+	character  = initializeSprite(textureID, vec3(imgWidth * 3.0, imgHeight * 3.0, 1.0), vec3(400, 100, 0), spriteSheetLines, spriteSheetColuns, velSprites);
 
-	// Carregando a textura dos itens a serem coletados (moedas) e armazenando seu id em "coin"
-	textureID = loadTexture("../Textures/Items/moeda.png", imgWidth, imgHeight);
-	coin = initializeSprite(textureID, vec3(imgWidth * 0.1, imgHeight * 0.1, 1.0), vec3(0, 0, 0), COLLECT);
+	// Carregando as texturas dos itens e armazenando seus ids em "itemsTextureID[]"
+	itemsTextureID[0] = loadTexture("../Textures/Items/moeda.png", imgWidth, imgHeight);
+	itemsTextureID[1] = loadTexture("../Textures/Items/moeda.png", imgWidth, imgHeight);
+	itemsTextureID[2] = loadTexture("../Textures/Items/bomba.png", imgWidth, imgHeight);
+	itemsTextureID[3] = loadTexture("../Textures/Items/bomba.png", imgWidth, imgHeight);
 
-	// Carregando a textura dos itens que causam dano (bombas) e armazenando seu id em "bomb"
-	textureID = loadTexture("../Textures/Items/bomba.png", imgWidth, imgHeight);
-	bomb = initializeSprite(textureID, vec3(imgWidth * 1.5, imgHeight * 1.5, 1.0), vec3(0, 0, 0), DENY);
-
-	// inicializa e gera os primeiros itens para utilização no gameloop
-	for (int i = 0; i < maxItems; i++) {
-		int n = rand() % 2;
-		if (n == 1)	{ items.push_back (coin); }	// tipo 0 -> adiciona uma moeda
-		else 		{ items.push_back (bomb); }	// tipo 1 -> adiciona uma bomba
-
-		spawnItem(items[i]);
-		//cout << "item " << i << " tipo " << n << " criado na posição " << items[i].pos.x << " , " << items[i].pos.y << " com velocidade " << items[i].vel << endl;
+	// inicializa e gera os itens para utilização no gameloop
+	// Notamos que todas as imagens são 32x32 originalmente e usamos imgWidth e imgHeight da última carregada
+	for (int i = 0; i < 4; i++) {
+		items.push_back(initializeSprite(itemsTextureID[i], vec3(imgWidth * 1.5, imgHeight * 1.5, 1.0), vec3(0, 0, 0)));
+		spawnItem(items[items.size()-1]);
+		cout << "item " << i << " criado em posição " << items[i].pos.x << " , " << items[i].pos.y << endl;
 	}
 
 	// Ativando o primeiro buffer de textura da OpenGL
@@ -198,7 +192,8 @@ int main() {
 
 	character.iAnimation = IDLE; // = 1
 
-	cout << "Pontuacao = " << score << "   Vidas: " << lives << endl;
+	cout << "Pontuacao = " << score << endl;
+	cout << "Nro de vidas = " << lives << endl;
 
 	
 	/*** Loop da aplicação - "game loop" ***/
@@ -213,40 +208,17 @@ int main() {
 		// enviando para variável uniform offsetTex
 		glUniform2f(glGetUniformLocation(shaderID, "offsetTexture"), 0.0, 0.0); 
 
-		//Checagem das colisões e chegada ao chão 
-		calculateAABB(character); // Calcula (atualiza) o PMin e o PMax do personagem, usados para testar a colisão
+		//Checagem das colisões
+		calculateAABB(character); // Calcula (atualiza) o PMin e o PMax usados para testar a colisão
 		for (int i=0; i < items.size(); i++) {
-
 			calculateAABB(items[i]);
 			if (checkCollision(character,items[i]))	{
-				if (items[i].effect == COLLECT)	{ 
-					score++;
-					if ((score % 5) == 0) {
-						if (velItems < velMax) { velItems += velInc; }	// aumenta a velocidade de queda dos itens a cada 5 pontos
-						lives++;
-					}
-				}
-
-				if (items[i].effect == DENY) { lives--; }
-				
-				int n = rand() % 2;
-				if (n == 1)	{ items[i] = coin; }	// tipo 0 -> adiciona uma moeda
-				else 		{ items[i] = bomb; }	// tipo 1 -> adiciona uma bomba
-
 				spawnItem(items[i]);
-
-				cout << "Pontuacao = " << score << "  Vidas: " << lives << "  Velocidade dos Itens: " << velItems << "  Efeito do novo Item criado: " << items[i].effect  << endl;
+				cout << "item " << i << " recriado em posição " << items[i].pos.x << " , " << items[i].pos.y << endl;
+				score++;
+				cout << "Pontuacao = " << score << endl;
+				velItems += 0.01;	// aumenta a velocidade de queda dos itens
 			}
-			else if (items[i].pos.y > 50)	{ items[i].pos.y -= items[i].vel; }	// verifica se não bateu no chão - antiga função updateItems();
-				else {	// se bateu no chão
-					int n = rand() % 2;
-					if (n == 1)	{ items[i] = coin; }	// tipo 0 -> adiciona uma moeda
-					else 		{ items[i] = bomb; }	// tipo 1 -> adiciona uma bomba
-
-					spawnItem(items[i]);
-
-					cout << "Pontuacao = " << score << "  Vidas: " << lives << "  Velocidade dos Itens: " << velItems << "  Efeito do novo Item criado: " << items[i].effect  << endl;					
-				}
 		}
 
 		// Desenha Primeiro Sprite = background
@@ -257,9 +229,12 @@ int main() {
 		updateSprite(shaderID, character);
 		drawSprite(shaderID, character);
 
-		// Desenha os Itens
+		// Itens
 		glUniform2f(glGetUniformLocation(shaderID, "offsetTexture"), 0.0, 0.0);
-		for (int i = 0; i < items.size(); i++) { drawSprite (shaderID, items[i]); }
+		for (int i = 0; i < items.size(); i++) {
+			drawSprite (shaderID, items[i]);
+			updateItems(shaderID, items[i]);
+		}
 
 		if (lives <= 0)	{
 			gameover = true;
@@ -278,7 +253,7 @@ int main() {
 	glfwTerminate(); // Finaliza a execução da GLFW, limpando os recursos alocados por ela
 	
 	return 0;
-} // fim do main
+} 
 
 // Função de callback de teclado - só pode ter uma instância (deve ser estática se
 // estiver dentro de uma classe) - É chamada sempre que uma tecla for pressionada
@@ -376,7 +351,7 @@ int setupShader() {	/*** Função para gerar o programa de shader ***/
 
 
 //
-Sprite initializeSprite(GLuint textureID, vec3 dimensions, vec3 position, int effect, int nAnimations, int nFrames, float vel, float angle)
+Sprite initializeSprite(GLuint textureID, vec3 dimensions, vec3 position, int nAnimations, int nFrames, float vel, float angle)
 {
 	Sprite sprite;
 
@@ -384,7 +359,6 @@ Sprite initializeSprite(GLuint textureID, vec3 dimensions, vec3 position, int ef
 	sprite.dimensions.x = dimensions.x / nFrames;		// dimensão em "x" é 
 	sprite.dimensions.y = dimensions.y / nAnimations;
 	sprite.pos = position;
-	sprite.effect = effect;
 	sprite.nAnimations = nAnimations;
 	sprite.nFrames = nFrames;
 	sprite.angle = angle;
@@ -545,9 +519,25 @@ void spawnItem(Sprite &sprite) {
 	
 	sprite.pos.x = rand() % (max - min + 1) + min;	// valor entre 10 e 790
 	lastSpawnX = sprite.pos.x;
-	sprite.pos.y = rand() % (1000 - 650 + 1) + 650; // valor entre 650 e 3000
-	
+	sprite.pos.y = rand() % (3000 - 650 + 1) + 650; // valor entre 650 e 3000
+	sprite.textureID = itemsTextureID[rand() % 3];
 	sprite.vel = velItems;
+	int n = rand() % 3;
+	if (n == 1)	{ sprite.vel = sprite.vel + sprite.vel * 0.01; }
+	else if (n == 2) { sprite.vel = sprite.vel - sprite.vel * 0.01; }
+}
+
+
+//
+void updateItems(GLuint shader, Sprite &sprite) {
+
+	if (sprite.pos.y > 50)	{ sprite.pos.y -= sprite.vel; }	// original era sprite.pos.y > 100
+	else {
+		lives--;
+		cout << "Vidas: " << lives << endl;
+		spawnItem(sprite);
+		cout << "item recriado na posição " << sprite.pos.x << " , " << sprite.pos.y << endl;
+	}
 }
 
 
@@ -573,4 +563,11 @@ bool checkCollision(Sprite one, Sprite two) {
 
     // collision only if on both axes
     return collisionX && collisionY;
+
+	// Verifica se as hitboxes retangulares se sobrepõem em x e y
+    //if ( (h1.posicao.x + h1.dimensao.x/2) < (h2.posicao.x - h2.dimensao.x/2) || (h2.posicao.x + h2.dimensao.x/2) < (h1.posicao.x - h1.dimensao.x/2)) return false;
+    //if ( (h1.posicao.y + h1.dimensao.y/2) < (h2.posicao.y - h2.dimensao.y/2) || (h2.posicao.y + h2.dimensao.y/2) < (h1.posicao.y - h1.dimensao.y/2)) return false;
+    //return true;	// Se passou pelas verificações, há colisão
+
+
 }
