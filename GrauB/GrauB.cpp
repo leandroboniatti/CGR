@@ -22,7 +22,7 @@ using namespace glm;	// Para não precisar digitar glm:: na frente de comandos d
 
 /*** Constantes	***/
 const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela
-const float velMax = 3.5f, velMin = 1.5f, velInc = 0.1f;
+const float velMax = 3.5f, velMin = 1.5f, velInc = 0.2f;
 const float FPS = 12.0f;
 const int numlives = 5;
 const int maxItems = 4;
