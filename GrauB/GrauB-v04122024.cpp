@@ -45,18 +45,18 @@ struct Sprite {
 	float angle;	 	// Ângulo de rotação aplicado ao elemento	(em radianos)
 
 	// Animação da spritesheet
-	int nAnimations; 	// quantidade de linhas do spritesheet utilizado
-	int nFrames;	 	// quantidade de colunas do spritesheet utilizado
-	int iAnimation;  	// deslocamentos nas linhas
-	int iFrame;      	// deslocamentos nas colunas
-	float ds, dt;	 	// deslocamentos em x e y no spritesheet
+	int nAnimations; 	//
+	int nFrames;	 	//
+	int iAnimation;  	//
+	int iFrame;      	//
+	float ds, dt;	 	//
 
 	// movimentação do sprite
-	float vel;		 	// velocidade atual do sprite
+	float vel;		 	//
 
 	// Para o cálculo da colisão (AABB - Axis Aligned Bounding Box) e efeito
-	vec2 PMax, PMin;	// posições min e max do quadrilátero que envolve o sprite
-	int effect;	// criado para informar se o sprite do tipo "item" criará dano ou coleta ao colidir com o personagem
+	vec2 PMax, PMin;
+	int effect;	// criado para informar se o sprite tipo item criará dano ou coleta ao colidir com o personagem
 };
 
 
@@ -101,7 +101,7 @@ int lives = numlives;
 int itemsTextureID[4];	// para guardar o ID das texturas de cada iten
 
 
-/*** Códigos fonte do Vertex Shader e do Fragment Shader foram deslocados para a função SetupShader() ***/
+/*** Códigos fonte do Vertex Shader e do Fragment Shader -> deslocados para a função SetupShader() ***/
 
 
 /*** Função MAIN ***/
@@ -141,7 +141,7 @@ int main() {
 
 	// Criação dos sprites - objetos da cena
 	Sprite background, character, coin, bomb;
-	vector <Sprite> items;	// vetor para armazenamento dos itens, coins e bombs
+	vector <Sprite> items;	// armazenamento dos itens
 
 	// Variáveis locais
 	int score = 0;
@@ -165,12 +165,10 @@ int main() {
 	bomb = initializeSprite(textureID, vec3(imgWidth * 1.5, imgHeight * 1.5, 1.0), vec3(0, 0, 0), DENY);
 
 	// inicializa e gera os primeiros itens para utilização no gameloop
-	// usaremos somente dois espaços de memória (coin e bomb) para armazenamento das texturas
-	// mesmo usando um número maior de itens na tela (por ex.: maxItems = 4)
 	for (int i = 0; i < maxItems; i++) {
 		int n = rand() % 2;
-		if (n == 1)	{ items.push_back (coin); }	// tipo COLLECT -> adiciona uma moeda
-		else 		{ items.push_back (bomb); }	// tipo DENY -> adiciona uma bomba
+		if (n == 1)	{ items.push_back (coin); }	// tipo 0 -> adiciona uma moeda
+		else 		{ items.push_back (bomb); }	// tipo 1 -> adiciona uma bomba
 
 		spawnItem(items[i]);
 		//cout << "item " << i << " tipo " << n << " criado na posição " << items[i].pos.x << " , " << items[i].pos.y << " com velocidade " << items[i].vel << endl;
@@ -200,7 +198,7 @@ int main() {
 
 	character.iAnimation = IDLE; // = 1
 
-	cout << "Pontuacao = " << score << "  Vidas: " << lives << endl;
+	cout << "Pontuacao = " << score << "   Vidas: " << lives << endl;
 
 	
 	/*** Loop da aplicação - "game loop" ***/
@@ -212,8 +210,46 @@ int main() {
 		glClearColor(193/255.0f, 229/255.0f, 245/255.0f, 1.0f); // define a cor de fundo - % normalizado, definido de 0.0 a 1.0 -> glClearColor(%RED, %GREEN, %BLUE, %ALPHA);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Desenha o background
-		glUniform2f(glGetUniformLocation(shaderID, "offsetTexture"), 0.0, 0.0); // enviando para variável uniform offsetTex
+		// enviando para variável uniform offsetTex
+		glUniform2f(glGetUniformLocation(shaderID, "offsetTexture"), 0.0, 0.0); 
+
+		//Checagem das colisões e chegada ao chão 
+		calculateAABB(character); // Calcula (atualiza) o PMin e o PMax do personagem, usados para testar a colisão
+		for (int i=0; i < items.size(); i++) {
+
+			calculateAABB(items[i]);
+			if (checkCollision(character,items[i]))	{
+				if (items[i].effect == COLLECT)	{ 
+					score++;
+					if ((score % 5) == 0) {
+						if (velItems < velMax) { velItems += velInc; }	// aumenta a velocidade de queda dos itens a cada 5 pontos
+						lives++;
+					}
+				}
+
+				if (items[i].effect == DENY) { lives--; }
+				
+				int n = rand() % 2;
+				if (n == 1)	{ items[i] = coin; }	// tipo 0 -> adiciona uma moeda
+				else 		{ items[i] = bomb; }	// tipo 1 -> adiciona uma bomba
+
+				spawnItem(items[i]);
+
+				cout << "Pontuacao = " << score << "  Vidas: " << lives << "  Velocidade dos Itens: " << velItems << "  Efeito do novo Item criado: " << items[i].effect  << endl;
+			}
+			else if (items[i].pos.y > 50)	{ items[i].pos.y -= items[i].vel; }	// verifica se não bateu no chão - antiga função updateItems();
+				else {	// se bateu no chão
+					int n = rand() % 2;
+					if (n == 1)	{ items[i] = coin; }	// tipo 0 -> adiciona uma moeda
+					else 		{ items[i] = bomb; }	// tipo 1 -> adiciona uma bomba
+
+					spawnItem(items[i]);
+
+					cout << "Pontuacao = " << score << "  Vidas: " << lives << "  Velocidade dos Itens: " << velItems << "  Efeito do novo Item criado: " << items[i].effect  << endl;					
+				}
+		}
+
+		// Desenha Primeiro Sprite = background
 		drawSprite(shaderID, background);
 		
 		// Desenha o personagem
@@ -222,60 +258,12 @@ int main() {
 		drawSprite(shaderID, character);
 
 		// Desenha os Itens
-		glUniform2f(glGetUniformLocation(shaderID, "offsetTexture"), 0.0, 0.0); // enviando para variável uniform offsetTex
+		glUniform2f(glGetUniformLocation(shaderID, "offsetTexture"), 0.0, 0.0);
 		for (int i = 0; i < items.size(); i++) { drawSprite (shaderID, items[i]); }
 
-		// Checagem das colisões ou chegada ao chão
-
-		calculateAABB(character); // Calcula (atualiza) o PMin e o PMax do personagem, usados para testar a colisão
-
-		for (int i=0; i < items.size(); i++) {	// laço para percorrer o vetor de sprites tipo coin e bomb
-
-			calculateAABB(items[i]);	// Calcula (atualiza) o PMin e o PMax do item armazenado em "items[i]", usados para testar a colisão
-
-			if (checkCollision(character,items[i]))	{	// se ocorreu colisão entre personagem e qualquer dos itens
-
-				if (items[i].effect == COLLECT)	{ // verifica se colidiu com moeda
-					score++;
-					if ((score % 5) == 0) {
-						if (velItems < velMax) { velItems += velInc; }	// aumenta a velocidade de queda dos itens a cada 5 pontos
-						lives++;
-					}
-				}
-
-				if (items[i].effect == DENY) { lives--; }	// verifica se colidiu com bomba
-				
-				if (lives <= 0)	{
-					gameover = true;
-					cout << "GAME OVER!" << endl;
-				}
-				else {	// gera um "novo" item em substituição ao que colidiu
-					
-					int n = rand() % 2;
-					if (n == 1)	{ items[i] = coin; }	// tipo COLLECT -> adiciona uma moeda
-					else 		{ items[i] = bomb; }	// tipo DENY -> adiciona uma bomba
-				
-					spawnItem(items[i]);
-
-					cout << "Pontuacao = " << score << "  Vidas: " << lives << "  Velocidade dos Itens: " << velItems << "  Efeito do novo Item criado: " << items[i].effect  << endl;
-				}
-			}
-			else if (items[i].pos.y > 50) {	// se não colidiu, verifica se não bateu no chão - antiga função updateItems();
-
-				items[i].pos.y -= items[i].vel;	// atualiza a posição do item
-
-			}	
-			else {	// se não colidiu e bateu no chão, 
-					
-				// gera um "novo" item em substituição ao que chegou a chão
-				int n = rand() % 2;
-				if (n == 1)	{ items[i] = coin; }	// tipo COLLECT -> adiciona uma moeda
-				else 		{ items[i] = bomb; }	// tipo DENY -> adiciona uma bomba
-
-				spawnItem(items[i]);
-
-				cout << "Pontuacao = " << score << "  Vidas: " << lives << "  Velocidade dos Itens: " << velItems << "  Efeito do novo Item criado: " << items[i].effect  << endl;					
-			}
+		if (lives <= 0)	{
+			gameover = true;
+			cout << "GAME OVER!" << endl;
 		}
 
 		glBindVertexArray(0); // Desconectando o buffer de geometria
@@ -292,10 +280,9 @@ int main() {
 	return 0;
 } // fim do main
 
-
 // Função de callback de teclado - só pode ter uma instância (deve ser estática se
 // estiver dentro de uma classe) - É chamada sempre que uma tecla for pressionada
-// ou solta, via GLFW
+// ou solta via GLFW
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) { glfwSetWindowShouldClose(window, GL_TRUE); }
@@ -388,7 +375,7 @@ int setupShader() {	/*** Função para gerar o programa de shader ***/
 }
 
 
-// Função que atribui valores aos parâmetros de um determinado sprite e Cria o VAO
+//
 Sprite initializeSprite(GLuint textureID, vec3 dimensions, vec3 position, int effect, int nAnimations, int nFrames, float vel, float angle)
 {
 	Sprite sprite;
@@ -456,6 +443,7 @@ Sprite initializeSprite(GLuint textureID, vec3 dimensions, vec3 position, int ef
 }
 
 
+//
 void drawSprite(GLuint shaderID, Sprite &sprite)
 {
 	glBindVertexArray(sprite.VAO);					// Conectando ao buffer de geometria
@@ -476,6 +464,7 @@ void drawSprite(GLuint shaderID, Sprite &sprite)
 }
 
 
+// 
 void updateSprite(GLuint shaderID, Sprite &sprite) {
 
 	// Incrementando o índice do frame apenas quando fechar a taxa de FPS desejada
@@ -529,7 +518,7 @@ int loadTexture(string filePath, int &width, int &height) {
 }
 
 
-// Função para movimentar as sprites (no caso, o personagem)
+// Função para movimentar as sprites (neste código só o personagem)
 void moveSprite(GLuint shaderID, Sprite &sprite)
 {
 	if (keys[GLFW_KEY_A] || keys[GLFW_KEY_LEFT]) {
@@ -562,7 +551,7 @@ void spawnItem(Sprite &sprite) {
 }
 
 
-// Calcula (atualiza) o PMin e o PMax do sprite, usados para testar a colisão com outro elemento
+//
 void calculateAABB(Sprite &sprite) {
 
 	sprite.PMin.x = sprite.pos.x - sprite.dimensions.x/2.0; 
@@ -573,6 +562,7 @@ void calculateAABB(Sprite &sprite) {
 }
 
 
+//
 bool checkCollision(Sprite one, Sprite two) {
 
 	// collision x-axis?
