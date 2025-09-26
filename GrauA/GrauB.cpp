@@ -1,8 +1,9 @@
-/***                      Jogo 2D com Sprites                     ***/
-/*** Disciplina de Computação Gráfica - Jogos Digitais - Unisinos ***/
+/***                             GRAU A                           ***/
+/*** Computação Gráfica em Tempo Real - Jogos Digitais - Unisinos ***/
 /***        Alunos: Ian Rossetti Boniatti e Eduardo Tropea        ***/
-/***  v:011224	***/
 
+/***  v:260925	***/
+/*** Em parte adaptado do GRAU B de Introdução a CG  ***/
 
 /*** INCLUDES ***/
 #include <iostream>
@@ -22,7 +23,7 @@ using namespace glm;	// Para não precisar digitar glm:: na frente de comandos d
 
 /*** Constantes	***/
 const GLuint WIDTH = 800, HEIGHT = 600;	// Dimensões da janela
-const float velMax = 3.5f, velMin = 1.5f, velInc = 0.2f;	// Parâmetros de "velocidade" do personagem e dos itens
+const float velMax = 0.5f, velMin = 0.05f, velInc = 0.02f;	// Parâmetros de "velocidade" do personagem e dos itens
 const float FPS = 12.0f;
 const int numlives = 5;
 const int maxItems = 4;
