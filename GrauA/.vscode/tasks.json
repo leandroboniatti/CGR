@@ -16,6 +16,8 @@
                 // Aqui você inclui o caminho para os outros arquivos .c ou .cpp
                 "${workspaceFolder}/../Dependencies/GLAD/src/glad.c",  //GLAD
                 "${workspaceFolder}/../Dependencies/stb_image/stb_image.cpp", //STB_IMAGE
+                "${workspaceFolder}/Shader.cpp",
+                "${workspaceFolder}/System.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 // Aqui você inclui o caminho para os diretórios que possuem as bibliotecas estáticas
