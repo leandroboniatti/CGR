@@ -1,15 +1,8 @@
 #include "System.h"
 
+System::System() { }
 
-
-System::System()
-{
-}
-
-
-System::~System()
-{
-}
+System::~System() { }
 
 int System::GLFWInit()
 {
@@ -29,7 +22,6 @@ int System::GLFWInit()
 	if (window == nullptr) {
 		std::cout << "Failed to create GLFW Window" << std::endl;
 		glfwTerminate();
-
 		return EXIT_FAILURE;
 	}
 
@@ -63,9 +55,7 @@ int System::OpenGLSetup()
 	return EXIT_SUCCESS;
 }
 
-int System::SystemSetup()
-{
-
+int System::SystemSetup() {
 	coreShader = Shader("Shaders/Core/core.vert", "Shaders/Core/core.frag");
 	coreShader.Use();
 

@@ -1,5 +1,4 @@
 #include "System.h"
-#include "Constants.h"
 
 System::System() {}
 
@@ -9,8 +8,8 @@ int System::GLFWInit() {
 
 	// GLFW: Inicialização e configurações de versão do OpenGL
 	glfwInit();	// Inicialização da GLFW
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);	// Informa a versão do OpenGL a partir da qual o código funcionará
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);	// Exemplo para versão 3.3 - Você deve adaptar para a versão do OpenGL suportada por sua placa
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);	// Informa a versão do OpenGL a partir da qual o código funcionará
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);	// Exemplo para versão 3.3 - Você deve adaptar para a versão do OpenGL suportada por sua placa
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); //Essencial para computadores da Apple
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
@@ -46,16 +45,18 @@ int System::GLFWInit() {
 	return EXIT_SUCCESS;
 }
 
-/**
+
 int System::ShaderSetup() {
-
-	//coreShader = Shader("Shaders/Core/core.vert", "Shaders/Core/core.frag");
-	coreShader = Shader();
-	coreShader.Use();
-
-	return EXIT_SUCCESS;
+	try {
+		coreShader.Setup();
+		coreShader.Use();
+		return EXIT_SUCCESS;
+	} catch (const exception& e) {
+		cerr << "[System::ShaderSetup] Erro ao inicializar shader: " << e.what() << "\n";
+		return EXIT_FAILURE;
+	}
 }
-*/
+
 /*
 int System::OpenGLSetup()
 {
@@ -71,9 +72,9 @@ int System::OpenGLSetup()
 
 	return EXIT_SUCCESS;
 }
+*/
 
-
-
+/*
 void System::Run()
 {
 

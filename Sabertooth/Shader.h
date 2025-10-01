@@ -13,16 +13,16 @@
 #include "Texture.h"
 
 
-class Shader
-{
+class Shader {
 public:
 	GLuint program;
 	std::map<std::string, Texture> textures;
 	GLint textureQtd;
 
 public:
-	Shader() { textureQtd = 0; }
 	~Shader();
+
+	Shader() { textureQtd = 0; }
 
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath) : Shader() {
 

@@ -1,9 +1,7 @@
 #include "Shader.h"
 
 
-Shader::~Shader()
-{
-}
+Shader::~Shader() { }
 
 void Shader::UseTexture(std::string textureName)
 {

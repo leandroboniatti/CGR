@@ -3,7 +3,7 @@
 /***        Alunos: Ian Rossetti Boniatti e Eduardo Tropea        ***/
 
 /***  v:011025	***/
-/*** Em parte adaptado do GRAU B de Fundamentos de CG  ***/
+/*** Em parte adaptado do GRAU B de Fundamentos de CG e do Exemplo SaberThoot ***/
 
 
 /*** INCLUDES ***/
@@ -19,8 +19,8 @@ enum sprites_effect	{NONE,COLLECT,DENY};
 struct Sprite {	
 
 	// Geometria e Transformações 
-	GLfloat VAO;     	// id do buffer de geometria	// Vertex Array Geometry do elemento
-	GLfloat textureID; 	// id da textura
+	GLuint VAO;     	// id do buffer de geometria	// Vertex Array Geometry do elemento
+	GLuint textureID; 	// id da textura
 	vec3 pos;		 	// Posição atual do elemento
 	vec3 dimensions; 	// Escala aplicada ao elemento (largura, altura)
 	float angle;	 	// Ângulo de rotação aplicado ao elemento	(em radianos)
@@ -82,27 +82,26 @@ int lives = NUM_LIVES;	// número de vidas do jogador
 //int itemsTextureID[MAX_ITEMS];	// para guardar o ID das texturas de cada iten
 
 
-/*** Códigos fonte do Vertex Shader e do Fragment Shader foram deslocados para a função SetupShader() ***/
-
 
 /*** Função MAIN ***/
 int main() {
-
-	System system;
 
 	srand(time(0)); // Horário do sistema como semente para a geração de números pseudo aleatórios
 	
 	for (int i = 0; i < 1024; i++) { keys[i] = false; }	// Inicializando o array de controle das teclas
 
-	system.GLFWInit();	// GLFW: Inicialização e configurações de versão do OpenGL
-	
-	glfwSetKeyCallback(system.window, key_callback);	// Registro da função de callback para a janela GLFW
+	System system;
 
-	//system.ShaderSetup(); // Compilando e montando o programa de shader
-	//GLint shaderID = system.coreShader.program; // Pegando o ID do programa de shader
-	// Compilando e montando o programa de shader
-	GLuint shaderID = setupShader(); // Retorna o identificador OpenGL do programa de shader
+	system.GLFWInit();	// GLFW e GLAD: Inicialização e configurações de versão do OpenGL
+
+	//system.OpenGLSetup(); // Configurações adicionais da OpenGL
+
+	system.ShaderSetup(); // Compilando e montando o programa de shader
+	GLuint shaderID = system.coreShader.program; // Pegando o ID do programa de shader
 	glUseProgram(shaderID); // Informa qual programa de shader será usado, no caso -> shaderID
+
+	// Registrando a função de callback de teclado - deve ser registrada após a criação da janela	
+	glfwSetKeyCallback(system.window, key_callback);
 
 	// Criação dos sprites - objetos da cena
 	Sprite background, character, coin, bomb;

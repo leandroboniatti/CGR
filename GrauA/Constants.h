@@ -2,8 +2,8 @@
 #define CONSTANTS_H
 
 // Window dimensions
-#define WIDTH 800
-#define HEIGHT 600
+#define D_WIDTH 800
+#define D_HEIGHT 600
 
 // Character movement parameters
 #define MAX_VELOCITY 0.3f

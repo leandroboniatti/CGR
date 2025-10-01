@@ -24,29 +24,26 @@
 #include "AssetManager.h"
 #include "Time.h"
 
-class System
-{
-private:
-	// Screen
-	const GLint WIDTH = 600, HEIGHT = 600;
-	int screenWidth, screenHeight;
+class System {
+	private:
+		// Screen
+		const GLint WIDTH = 600, HEIGHT = 600;
+		int screenWidth, screenHeight;
 
-public:
-	GLFWwindow* window;
-	Shader coreShader;
+	public:
+		GLFWwindow* window;
+		Shader coreShader;
 
-public:
-	System();
-	~System();
+	public:
+		System();
+		~System();
 
-	int GLFWInit();
-	int OpenGLSetup();
-	int SystemSetup();
+		int GLFWInit();
+		int OpenGLSetup();
+		int SystemSetup();
 
-	void Run();
-
-	void Finish();
-
+		void Run();
+		void Finish();
 };
 
 #endif
