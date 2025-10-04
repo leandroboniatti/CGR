@@ -1,40 +1,53 @@
-/***                             GRAU A                           ***/
+/***                  GRAU A - Visualizador 3D                    ***/
 /*** Computação Gráfica em Tempo Real - Jogos Digitais - Unisinos ***/
 /***        Alunos: Ian Rossetti Boniatti e Eduardo Tropea        ***/
 
 /***  v:011025	***/
 /*** Em parte adaptado do GRAU B de Fundamentos de CG e em parte do Exemplo SaberThoot ***/
 
-// Internal
 
-#include "src/glad.h"
-#include <GLFW/glfw3.h>
-#include <iostream>
+
+// OpenGL - External
+#include <glad/glad.h>  // biblioteca de funções baseada nas definições/especificações OPENGL - Incluir antes de outros que requerem OpenGL (como GLFW)
+#include <GLFW/glfw3.h> // biblioteca de funções para criação da janela no Windows e gerenciar entrada de teclado/mouse
+//#include <stb_image.h>
+
+// Header files
+//#include "src/System.h"
 #include "src/Scene.h"
 #include "src/Camera.h"
 #include "src/ShaderProgram.h"
+
+// Internal
+#include <iostream>
 
 // Configurações da janela
 const unsigned int WINDOW_WIDTH = 1024;
 const unsigned int WINDOW_HEIGHT = 768;
 
 // Variáveis globais
-Scene* scene = nullptr;         // criado como um ponteiro nulo para o objeto Scene - acessar via scene->...
+Scene* scene = nullptr;         // criado como um ponteiro nulo para o objeto Scene  - acessar via scene->...
 Camera* camera = nullptr;       // criado como um ponteiro nulo para o objeto Camera - acessar via camera->...
-bool keys[1024];
+//System contexto;
+bool keys[1024];    // para identificar as teclas pressionadas
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float lastX = WINDOW_WIDTH / 2.0f;
 float lastY = WINDOW_HEIGHT / 2.0f;
 bool firstMouse = true;
 
-// Callbacks
+// Protótipos (ou Cabeçalhos) das funções de Callback
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
+
+/*** Função MAIN ***/
 int main() {
+
+//    contexto.GLFWInit();
+
     // Inicializar GLFW
     if (!glfwInit()) {
         std::cerr << "Falha ao inicializar GLFW" << std::endl;
@@ -55,12 +68,16 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
+
+
+
     glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     // Capturar cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
     // Inicializar GLAD
     if (!gladLoadGL()) {
