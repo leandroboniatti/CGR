@@ -1,8 +1,11 @@
 #include "System.h"
 
-System::System() {}
 
-System::~System() {}
+System::System() { }
+
+
+System::~System() { }
+
 
 int System::GLFWInit() {
 
@@ -52,7 +55,7 @@ int System::ShaderSetup() {
 		coreShader.Use();
 		return EXIT_SUCCESS;
 	} catch (const exception& e) {
-		cerr << "[System::ShaderSetup] Erro ao inicializar shader: " << e.what() << "\n";
+		cerr << "[System::ShaderSetup] Erro ao inicializar o shader: " << e.what() << "\n";
 		return EXIT_FAILURE;
 	}
 }
@@ -73,6 +76,21 @@ int System::OpenGLSetup()
 	return EXIT_SUCCESS;
 }
 */
+
+
+void System::LoadTexture(char* path, char* textureUniformName, string textureName) {
+	Texture tempTexture(path, textureUniformName, textureQtd, coreShader.program);
+	// Inserção por move para evitar cópia (operator= deletado)
+	textures.emplace(std::move(textureName), std::move(tempTexture));
+	textureQtd += 1;
+}
+
+
+void System::UseTexture(string textureName) {
+	glActiveTexture(GL_TEXTURE0 + textures[textureName].GetTextureNum());
+	glBindTexture(GL_TEXTURE_2D, textures[textureName].GetTextureId());
+}
+
 
 /*
 void System::Run()

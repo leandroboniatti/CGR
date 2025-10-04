@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Configure CMake",
+      "type": "shell",
+      "command": "cmake",
+  "args": ["-S", ".", "-B", "build", "-G", "Visual Studio 17 2022", "-DCMAKE_BUILD_TYPE=Debug"],
+      "group": "build"
+    },
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "build", "--config", "Debug", "--parallel"],
+      "group": "build",
+      "dependsOn": ["Configure CMake"],
+      "problemMatcher": ["$gcc"],
+      "detail": "Compila o projeto OpenGL"
+    },
+    {
+      "label": "Run",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-NoProfile", "-Command", "./build/Debug/obj_viewer.exe"],
+      "group": "test",
+      "dependsOn": ["Build"],
+      "presentation": {"reveal": "always"}
+    }
+  ]
+}

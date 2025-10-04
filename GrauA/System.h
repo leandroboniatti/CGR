@@ -7,6 +7,7 @@
 #include <cmath>
 #include <vector>
 #include <assert.h>
+#include <map>
 
 #include <glad/glad.h> 	// biblioteca de funções baseada nas definições/especificações OPENGL - Incluir antes de outros que requerem OpenGL (como GLFW)
 #include <GLFW/glfw3.h> // biblioteca de funções para criação da janela no Windows e gerenciar entrada de teclado/mouse
@@ -27,7 +28,8 @@ using namespace glm;	// Para não precisar digitar glm:: na frente de comandos d
 // Headers
 #include "Constants.h"
 #include "Shader.h"
-//#include "AssetManager.h"
+#include "Texture.h"
+#include "AssetManager.h"
 #include "Time.h"
 
 class System {
@@ -39,6 +41,8 @@ class System {
 	public:
 		GLFWwindow* window;
 		Shader coreShader;
+		std::map<std::string, Texture> textures; // container associativo que guarda as texturas carregadas (nome, textura)
+		GLint textureQtd = 0;
 
 	public:
 		System();
@@ -47,6 +51,8 @@ class System {
 		int GLFWInit();
 		int ShaderSetup();
 		//int OpenGLSetup();
+		void LoadTexture(char* path, char* textureUniformName, string textureName);
+		void UseTexture(string textureName);
 		//void Run();
 		//void Finish();
 };

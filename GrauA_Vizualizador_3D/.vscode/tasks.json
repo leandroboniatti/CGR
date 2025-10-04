@@ -1,0 +1,95 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build Project (GrauA)",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-std=c++17",
+                "-Wall",
+                "-Wextra",
+                "-O2",
+                "-g",
+                "-I${workspaceFolder}/src",
+                "-I${workspaceFolder}/../Dependencies/GLAD/include",
+                "-I${workspaceFolder}/../Dependencies/glfw-3.4.bin.WIN64/include",
+                "-I${workspaceFolder}/../Dependencies/glm",
+                "-I${workspaceFolder}/../Dependencies/stb_image",
+                "${workspaceFolder}/main.cpp",
+                "${workspaceFolder}/src/Bullet.cpp",
+                "${workspaceFolder}/src/Camera.cpp",
+                "${workspaceFolder}/src/Obj3D.cpp",
+                "${workspaceFolder}/src/Scene.cpp",
+                "${workspaceFolder}/src/ShaderProgram.cpp",
+                "${workspaceFolder}/src/glad.c",
+                "-L${workspaceFolder}/../Dependencies/glfw-3.4.bin.WIN64/lib-mingw-w64",
+                "-lglfw3",
+                "-lopengl32",
+                "-lgdi32",
+                "-luser32",
+                "-lkernel32",
+                "-static-libgcc",
+                "-static-libstdc++",
+                "-o",
+                "${workspaceFolder}/visualizador3d.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "Compilar o projeto Visualizador 3D completo"
+        },
+        {
+            "type": "shell",
+            "label": "Clean Project",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "if exist obj rmdir /s /q obj && if exist visualizador3d.exe del visualizador3d.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "detail": "Limpar arquivos compilados"
+        },
+        {
+            "type": "shell",
+            "label": "Run Project",
+            "command": "${workspaceFolder}/visualizador3d.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test",
+            "dependsOn": "Build Project (GrauA)",
+            "detail": "Executar o visualizador 3D"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe arquivo de build ativo",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Tarefa gerada pelo Depurador."
+        }
+    ],
+    "version": "2.0.0"
+}

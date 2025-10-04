@@ -15,6 +15,7 @@
 enum sprites_states {IDLE = 1,MOVING_RIGHT,MOVING_LEFT}; // Inicializando IDLE em 1 os seguintes serão 2 e 3
 enum sprites_effect	{NONE,COLLECT,DENY};
 
+// Sprite = imagem ou objeto gráfico bidimensional
 // Estrutura para armazenar informações sobre um determinado elemento Sprite
 struct Sprite {	
 
@@ -115,6 +116,10 @@ int main() {
 	// Carregando a textura do fundo e armazenando seu id em "backgroud"
 	textureID  = loadTexture("../Textures/Backgrounds/fundo.png", imgWidth, imgHeight);
 	background = initializeSprite(textureID, vec3(imgWidth * 0.4, imgHeight * 0.4, 1.0), vec3(400, 300, 0));
+
+	//system.LoadTexture((char*)"../Textures/Characters/Personagem.png", (char*)"testura1", "Personagem");
+	//system.UseTexture("Personagem");
+
 
 	// Carregando a textura do personagem e armazenando seu id em "character"
 	textureID  = loadTexture("../Textures/Characters/Personagem.png", imgWidth, imgHeight);
@@ -268,89 +273,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	else if (action == GLFW_RELEASE) { keys[key] = false; }	// usamos else e não outro if por causa do deslocamento da personagem quando mantemos a tecla pressionada
 }
 
-
-// Função responsável pela compilação e montagem do programa de shader
-// Os códigos fonte do vertex shader e do fragment shader estão nos arrays vertexShaderSource e fragmentShaderSource no iniçio desta função
-// A função retorna o identificador do programa de shader (em "main" teremos shaderID = setupShader(), que equivale a shaderID = shaderProgram)
-int setupShader() {	/*** Função para gerar o programa de shader ***/
-
-	// Código fonte do Vertex Shader (em GLSL - Graphics Library Shading Language)
-	const GLchar *vertexShaderSource = R"(
-		#version 400
-		layout (location = 0) in vec3 coordenadasDaGeometria;
-		layout (location = 1) in vec2 coordenadasDaTextura;
-		uniform mat4 projection;
-		uniform mat4 model;
-		out vec2 textureCoord;
-		void main() {
-   			gl_Position = projection * model * vec4( coordenadasDaGeometria , 1.0 );
-			textureCoord = vec2( coordenadasDaTextura.s , 1.0 - coordenadasDaTextura.t );
-		}
-	)";
-		// "coordenadasDaGeometria" recebe as informações que estão no local 0 -> definidas em glVertexAttribPointer(0, xxxxxxxx);
-		// "coordenadasDaTextura"   recebe as informações que estão no local 1 -> definidas em glVertexAttribPointer(1, xxxxxxxx);
-		// "projection" receberá as informações da forma de projeção escolhida
-		// "model" receberá as informações das transformações a serem aplicadas (translação, escala, rotação)
-		// "textureCoord" enviará ao pipeline a textura de uma posição específica
-		// "gl_Position" é uma variável específica do GLSL que recebe a posição final do vertice processado
-		
-
-	//Código fonte do Fragment Shader (em GLSL - Graphics Library Shading Language)
-	const GLchar* fragmentShaderSource = R"(
-		#version 400
-		in vec2 textureCoord;			 // incluído
-		uniform sampler2D textureBuffer; // incluído
-		uniform vec2 offsetTexture;		 // incluído
-		out vec4 color;
-		void main() { color = texture(textureBuffer,textureCoord + offsetTexture); }	// modificado
-	)";
-
-	// Compilando os shaders
-	// Vertex shader
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	// Checando erros de compilação (exibição via log no terminal)
-	GLint success;
-	GLchar infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// Fragment shader
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	// Checando erros de compilação (exibição via log no terminal)
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// Linkando os shaders e criando o identificador do programa de shader
-	GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	// Checando por erros de linkagem
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-	}
-
-	// Deletando os shaders, eles foram linkados no programa de shader e não são mais necessários
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return shaderProgram;	// retorna o identificador para o programa de shader
-}
 
 
 // Função que atribui valores aos parâmetros de um determinado sprite e Cria o VAO
