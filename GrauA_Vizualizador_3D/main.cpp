@@ -2,10 +2,12 @@
 /*** Computação Gráfica em Tempo Real - Jogos Digitais - Unisinos ***/
 /***        Alunos: Ian Rossetti Boniatti e Eduardo Tropea        ***/
 
-/***  v:011025	***/
+/***  v:	***/
 /*** Em parte adaptado do GRAU B de Fundamentos de CG e em parte do Exemplo SaberThoot ***/
 
 
+// Internal
+#include <iostream>
 
 // OpenGL - External
 #include <glad/glad.h>  // biblioteca de funções baseada nas definições/especificações OPENGL - Incluir antes de outros que requerem OpenGL (como GLFW)
@@ -13,22 +15,20 @@
 //#include <stb_image.h>
 
 // Header files
-//#include "src/System.h"
+#include "src/System.h"
 #include "src/Scene.h"
 #include "src/Camera.h"
 #include "src/ShaderProgram.h"
 
-// Internal
-#include <iostream>
 
 // Configurações da janela
 const unsigned int WINDOW_WIDTH = 1024;
 const unsigned int WINDOW_HEIGHT = 768;
 
 // Variáveis globais
-Scene* scene = nullptr;         // criado como um ponteiro nulo para o objeto Scene  - acessar via scene->...
-Camera* camera = nullptr;       // criado como um ponteiro nulo para o objeto Camera - acessar via camera->...
-//System contexto;
+Scene* cena = nullptr;     // criado como um ponteiro nulo para um objeto Scene  - acessar via scene->...
+Camera* camera = nullptr;  // criado como um ponteiro nulo para um objeto Camera - acessar via camera->...
+System* sistema = nullptr; // criado como um ponteiro nulo para um objeto System - acessar via contexto->...
 bool keys[1024];    // para identificar as teclas pressionadas
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -46,31 +46,13 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 /*** Função MAIN ***/
 int main() {
 
-//    contexto.GLFWInit();
+    sistema = new System(); // Criando o objeto sistema
 
-    // Inicializar GLFW
-    if (!glfwInit()) {
-        std::cerr << "Falha ao inicializar GLFW" << std::endl;
-        return -1;
-    }
+    sistema->GLFWInit();   // Inicializando GLFW
 
-    // Configurar GLFW
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    GLFWwindow* window = sistema->window; // Acessar a janela criada no System
 
-    // Criar janela
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Visualizador 3D - CGR", nullptr, nullptr);
-    if (!window) {
-        std::cerr << "Falha ao criar janela GLFW" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-
-
-
+    // Configurar Callbacks
     glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -78,28 +60,19 @@ int main() {
     // Capturar cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
-    // Inicializar GLAD
-    if (!gladLoadGL()) {
-        std::cerr << "Falha ao inicializar GLAD" << std::endl;
-        return -1;
-    }
-
-    // Configurar OpenGL
-    glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
     // Criar objetos principais
     camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-    scene = new Scene();
+    cena = new Scene();
 
     // Carregar cena a partir do arquivo de configuração
-    if (!scene->loadFromConfig("config/scene.cfg")) {
+    if (!cena->loadFromConfig("config/scene.cfg")) {
         std::cerr << "Erro ao carregar configuração da cena" << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
+
     // Loop principal
+
     while (!glfwWindowShouldClose(window)) {
         // Calcular delta time
         float currentFrame = glfwGetTime();
@@ -115,15 +88,16 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Atualizar e renderizar cena
-        scene->update(deltaTime);
-        scene->render(*camera);
+        cena->update(deltaTime);
+        cena->render(*camera);
 
         glfwSwapBuffers(window);
     }
 
     // Limpeza
-    delete scene;
+    delete cena;
     delete camera;
+    delete sistema;
     glfwTerminate();
     return 0;
 }
@@ -170,7 +144,7 @@ void processInput(GLFWwindow* window) {
 
     // Disparo
     if (keys[GLFW_KEY_SPACE]) {
-        scene->shoot(camera->getPosition(), camera->getFront());
+        cena->shoot(camera->getPosition(), camera->getFront());
         keys[GLFW_KEY_SPACE] = false; // Evitar múltiplos disparos
     }
 }

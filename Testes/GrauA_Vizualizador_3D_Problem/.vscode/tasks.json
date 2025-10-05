@@ -1,0 +1,73 @@
+{
+    "tasks": [
+        {   // Tarefa para compilar o projeto completo
+            "label": "Compilar Projeto (GrauA)",
+            "type": "shell",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-std=c++17",
+                "-Wall",
+                "-Wextra",
+                "-O2",
+                "-g",
+                // Aqui você inclui os caminhos para os diretórios que contém os cabeçalhos das funções
+                "-I${workspaceFolder}/src",
+                "-I${workspaceFolder}/../Dependencies/GLAD/include",
+                "-I${workspaceFolder}/../Dependencies/glfw-3.4.bin.WIN64/include",
+                "-I${workspaceFolder}/../Dependencies/glm",
+                "-I${workspaceFolder}/../Dependencies/stb_image",
+                // Aqui você inclui o caminho para os outros arquivos .c ou .cpp
+                "${workspaceFolder}/../Dependencies/GLAD/src/glad.c",
+                "${workspaceFolder}/main.cpp",
+                //"${workspaceFolder}/src/System.cpp",
+                "${workspaceFolder}/src/Bullet.cpp",
+                "${workspaceFolder}/src/Camera.cpp",
+                "${workspaceFolder}/src/Obj3D.cpp",
+                "${workspaceFolder}/src/Scene.cpp",
+                "${workspaceFolder}/src/ShaderProgram.cpp",
+                // Aqui você inclui o caminho para as bibliotecas estáticas (.lib ou .a), com -l na frente
+                "-L${workspaceFolder}/../Dependencies/glfw-3.4.bin.WIN64/lib-mingw-w64",
+                "-lglfw3",
+                "-lopengl32",
+                "-lgdi32",
+                "-luser32",
+                "-lkernel32",
+                "-static-libgcc",
+                "-static-libstdc++",
+                "-o",
+                "${workspaceFolder}/visualizador3d.exe",
+                "-Wno-pragmas"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": [ "$gcc" ],
+            "group": "build",
+            "detail": "Compilar o projeto Visualizador 3D completo"
+        },
+
+        {   // Tarefa para limpar arquivos compilados
+            "type": "shell",
+            "label": "Limpar Projeto",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "if exist obj rmdir /s /q obj && if exist visualizador3d.exe del visualizador3d.exe"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "detail": "Limpar arquivos compilados"
+        },
+
+        {   // Tarefa para executar o programa compilado
+            "type": "shell",
+            "label": "Executar Projeto",
+            "command": "${workspaceFolder}/visualizador3d.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test",
+            "dependsOn": "Compilar Projeto (GrauA)",
+            "detail": "Executar o visualizador 3D"
+        },
+    ],
+    "version": "2.0.0"
+}

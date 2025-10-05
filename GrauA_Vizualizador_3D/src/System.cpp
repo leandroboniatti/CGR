@@ -1,5 +1,6 @@
 #include "System.h"
 
+
 System::System() { }
 
 System::~System() { }
@@ -20,13 +21,11 @@ int System::GLFWInit() {
 
 	// Criação da janela GLFW
 	window = glfwCreateWindow(WIDTH, HEIGHT, "GRAU A - Ian R. Boniatti e Eduardo Tropea", nullptr, nullptr);
-
 	if (window == nullptr) {
 		std::cerr << "Falha ao criar a janela GLFW" << std::endl;
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
-
 	glfwMakeContextCurrent(window);
 
 	// GLAD: Inicializa e carrega todos os ponteiros de funções da OpenGL
@@ -34,6 +33,10 @@ int System::GLFWInit() {
 		std::cerr << "Falha ao inicializar GLAD" << std::endl;
 		return EXIT_FAILURE;
 	}
+    glEnable(GL_DEPTH_TEST); // Habilitar teste de profundidade
+	//glEnable(GL_CULL_FACE); // Habilitar backface culling
+	//glCullFace(GL_BACK);	// Culling de faces traseiras
+	//glFrontFace(GL_CW);	// Front faces no sentido horário
 	
 	// Definindo as dimensões da viewport com as mesmas dimensões da janela da aplicação
 	glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
@@ -49,6 +52,18 @@ int System::GLFWInit() {
 }
 
 /*
+int System::ShaderSetup() {
+	try {
+		//coreShader.Setup();
+		//coreShader.Use();
+		return EXIT_SUCCESS;
+	} catch (const exception& e) {
+		cerr << "[System::ShaderSetup] Erro ao inicializar o shader: " << e.what() << "\n";
+		return EXIT_FAILURE;
+	}
+}
+
+
 int System::OpenGLSetup()
 {
 
@@ -63,16 +78,23 @@ int System::OpenGLSetup()
 
 	return EXIT_SUCCESS;
 }
-*/
 
 
-/*
-int System::SystemSetup() {
-	coreShader = Shader("Shaders/Core/core.vert", "Shaders/Core/core.frag");
-	coreShader.Use();
 
-	return EXIT_SUCCESS;
+void System::LoadTexture(char* path, char* textureUniformName, string textureName) {
+	Texture tempTexture(path, textureUniformName, textureQtd, coreShader.program);
+	// Inserção por move para evitar cópia (operator= deletado)
+	textures.emplace(std::move(textureName), std::move(tempTexture));
+	textureQtd += 1;
 }
+
+
+void System::UseTexture(string textureName) {
+	glActiveTexture(GL_TEXTURE0 + textures[textureName].GetTextureNum());
+	glBindTexture(GL_TEXTURE_2D, textures[textureName].GetTextureId());
+}
+
+
 
 void System::Run()
 {
@@ -142,11 +164,11 @@ void System::Run()
 
 
 }
-*/
 
 void System::Finish()
 {
-	//coreShader.Delete();
+	coreShader.Delete();
 
 	glfwTerminate();
 }
+*/

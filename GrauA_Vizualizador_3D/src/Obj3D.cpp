@@ -1,24 +1,23 @@
 #include "Obj3D.h"
-#include <glad/glad.h>  // biblioteca de funções baseada nas definições/especificações OPENGL - Incluir antes de outros que requerem OpenGL (como GLFW)
-
+#include <glad/glad.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <stb_image.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 Obj3D::Obj3D(const std::string& objFile, const glm::vec3& position, 
              const glm::vec3& rotation, const glm::vec3& scale, bool eliminable)
-    : objPath(objFile), eliminable(eliminable), modelMatrix(1.0f) {
-    
+    : eliminable(eliminable), objPath(objFile), modelMatrix(1.0f) {
+
     setPosition(position);
     setRotation(rotation);
     setScale(scale);
     updateModelMatrix();
 }
-
 
 Obj3D::~Obj3D() {
     for (auto& group : groups) {
@@ -241,7 +240,7 @@ unsigned int Obj3D::loadTexture(const std::string& path) {
     int width, height, nrComponents;
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
     if (data) {
-        GLenum format = GL_RGB; // valor padrão
+        GLenum format;
         if (nrComponents == 1)
             format = GL_RED;
         else if (nrComponents == 3)
