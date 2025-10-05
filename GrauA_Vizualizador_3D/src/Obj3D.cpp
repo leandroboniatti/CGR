@@ -9,13 +9,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+// Inicializar cache de texturas estático
+std::map<std::string, unsigned int> Obj3D::textureCache;
+
 Obj3D::Obj3D(const std::string& objFile, const glm::vec3& position, 
              const glm::vec3& rotation, const glm::vec3& scale, bool eliminable)
-    : eliminable(eliminable), objPath(objFile), modelMatrix(1.0f) {
+    : objPath(objFile), modelMatrix(1.0f), position(position), rotation(rotation), 
+      scale(scale), eliminable(eliminable) {
 
-    setPosition(position);
-    setRotation(rotation);
-    setScale(scale);
     updateModelMatrix();
 }
 
@@ -26,8 +27,12 @@ Obj3D::~Obj3D() {
         if (group.EBO) glDeleteBuffers(1, &group.EBO);
     }
     
+    // Limpeza de texturas (cuidado com o cache compartilhado)
     for (auto& material : materials) {
-        if (material.textureID) glDeleteTextures(1, &material.textureID);
+        if (material.diffuseTextureID) {
+            // Verificar se a textura não está sendo usada por outros objetos
+            // antes de deletar (implementação simplificada)
+        }
     }
 }
 
@@ -214,6 +219,18 @@ bool Obj3D::loadMTL(const std::string& path) {
         else if (prefix == "Ns") {
             iss >> currentMaterial.shininess;
         }
+        else if (prefix == "d" || prefix == "Tr") {
+            iss >> currentMaterial.transparency;
+        }
+        else if (prefix == "Ni") {
+            iss >> currentMaterial.opticalDensity;
+        }
+        else if (prefix == "illum") {
+            iss >> currentMaterial.illuminationModel;
+        }
+        else if (prefix == "Ke") {
+            iss >> currentMaterial.emission.x >> currentMaterial.emission.y >> currentMaterial.emission.z;
+        }
         else if (prefix == "map_Kd") {
             iss >> currentMaterial.diffuseTexture;
             // Carregar textura
@@ -221,7 +238,23 @@ bool Obj3D::loadMTL(const std::string& path) {
             if (lastSlash != std::string::npos) {
                 currentMaterial.diffuseTexture = path.substr(0, lastSlash + 1) + currentMaterial.diffuseTexture;
             }
-            currentMaterial.textureID = loadTexture(currentMaterial.diffuseTexture);
+            currentMaterial.diffuseTextureID = loadTexture(currentMaterial.diffuseTexture);
+        }
+        else if (prefix == "map_Ks") {
+            iss >> currentMaterial.specularTexture;
+            size_t lastSlash = path.find_last_of("/\\");
+            if (lastSlash != std::string::npos) {
+                currentMaterial.specularTexture = path.substr(0, lastSlash + 1) + currentMaterial.specularTexture;
+            }
+            currentMaterial.specularTextureID = loadTexture(currentMaterial.specularTexture);
+        }
+        else if (prefix == "map_Bump" || prefix == "bump") {
+            iss >> currentMaterial.normalTexture;
+            size_t lastSlash = path.find_last_of("/\\");
+            if (lastSlash != std::string::npos) {
+                currentMaterial.normalTexture = path.substr(0, lastSlash + 1) + currentMaterial.normalTexture;
+            }
+            currentMaterial.normalTextureID = loadTexture(currentMaterial.normalTexture);
         }
     }
     
@@ -234,13 +267,19 @@ bool Obj3D::loadMTL(const std::string& path) {
 }
 
 unsigned int Obj3D::loadTexture(const std::string& path) {
+    // Verificar se a textura já foi carregada
+    auto it = textureCache.find(path);
+    if (it != textureCache.end()) {
+        return it->second;
+    }
+    
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
     if (data) {
-        GLenum format;
+        GLenum format = GL_RGB; // Inicializar com valor padrão
         if (nrComponents == 1)
             format = GL_RED;
         else if (nrComponents == 3)
@@ -258,9 +297,17 @@ unsigned int Obj3D::loadTexture(const std::string& path) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
+        
+        // Adicionar ao cache
+        textureCache[path] = textureID;
+        
+        std::cout << "Textura carregada com sucesso: " << path << std::endl;
     } else {
         std::cerr << "Falha ao carregar textura: " << path << std::endl;
         stbi_image_free(data);
+        
+        // Retornar textura branca padrão em caso de erro
+        textureID = 0; // Será criada uma textura padrão se necessário
     }
 
     return textureID;
@@ -321,56 +368,20 @@ void Obj3D::render(unsigned int shaderProgram) {
     
     for (const auto& group : groups) {
         // Encontrar e aplicar material
-        Material* material = nullptr;
-        for (auto& mat : materials) {
-            if (mat.name == group.materialName) {
-                material = &mat;
-                break;
-            }
-        }
+        Material* material = findMaterial(group.materialName);
         
-        if (material) {
-            // Aplicar propriedades do material
-            int ambientLoc = glGetUniformLocation(shaderProgram, "material.ambient");
-            int diffuseLoc = glGetUniformLocation(shaderProgram, "material.diffuse");
-            int specularLoc = glGetUniformLocation(shaderProgram, "material.specular");
-            int shininessLoc = glGetUniformLocation(shaderProgram, "material.shininess");
-            
-            glUniform3fv(ambientLoc, 1, glm::value_ptr(material->ambient));
-            glUniform3fv(diffuseLoc, 1, glm::value_ptr(material->diffuse));
-            glUniform3fv(specularLoc, 1, glm::value_ptr(material->specular));
-            glUniform1f(shininessLoc, material->shininess);
-            
-            // Bind texture
-            if (material->textureID) {
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, material->textureID);
-                int textureLoc = glGetUniformLocation(shaderProgram, "diffuseTexture");
-                glUniform1i(textureLoc, 0);
-            }
+        if (!material) {
+            // Usar material padrão se nenhum material for encontrado
+            Material defaultMat = Material::getDefault();
+            applyMaterial(defaultMat, shaderProgram);
+        } else {
+            applyMaterial(*material, shaderProgram);
         }
         
         glBindVertexArray(group.VAO);
         glDrawElements(GL_TRIANGLES, group.indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
-}
-
-void Obj3D::setPosition(const glm::vec3& position) {
-    // Implementar lógica de posição
-}
-
-void Obj3D::setRotation(const glm::vec3& rotation) {
-    // Implementar lógica de rotação
-}
-
-void Obj3D::setScale(const glm::vec3& scale) {
-    // Implementar lógica de escala
-}
-
-void Obj3D::updateModelMatrix() {
-    // Implementar atualização da matriz de modelo
-    modelMatrix = glm::mat4(1.0f);
 }
 
 bool Obj3D::checkCollision(const glm::vec3& point) const {
@@ -416,4 +427,161 @@ bool Obj3D::checkRayIntersection(const glm::vec3& rayOrigin, const glm::vec3& ra
     
     distance = tmin > 0 ? tmin : tmax;
     return distance > 0;
+}
+
+// Implementações dos novos métodos de material
+
+void Obj3D::setPosition(const glm::vec3& pos) {
+    position = pos;
+    updateModelMatrix();
+}
+
+void Obj3D::setRotation(const glm::vec3& rot) {
+    rotation = rot;
+    updateModelMatrix();
+}
+
+void Obj3D::setScale(const glm::vec3& scl) {
+    scale = scl;
+    updateModelMatrix();
+}
+
+void Obj3D::updateModelMatrix() {
+    modelMatrix = glm::mat4(1.0f);
+    
+    // Aplicar transformações na ordem: Translação * Rotação * Escala
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::rotate(modelMatrix, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    modelMatrix = glm::scale(modelMatrix, scale);
+}
+
+Material* Obj3D::findMaterial(const std::string& materialName) {
+    for (auto& mat : materials) {
+        if (mat.name == materialName) {
+            return &mat;
+        }
+    }
+    return nullptr;
+}
+
+void Obj3D::applyMaterial(const Material& material, unsigned int shaderProgram) {
+    // Aplicar propriedades do material
+    int ambientLoc = glGetUniformLocation(shaderProgram, "material.ambient");
+    int diffuseLoc = glGetUniformLocation(shaderProgram, "material.diffuse");
+    int specularLoc = glGetUniformLocation(shaderProgram, "material.specular");
+    int shininessLoc = glGetUniformLocation(shaderProgram, "material.shininess");
+    int emissionLoc = glGetUniformLocation(shaderProgram, "material.emission");
+    
+    glUniform3fv(ambientLoc, 1, glm::value_ptr(material.ambient));
+    glUniform3fv(diffuseLoc, 1, glm::value_ptr(material.diffuse));
+    glUniform3fv(specularLoc, 1, glm::value_ptr(material.specular));
+    glUniform1f(shininessLoc, material.shininess);
+    
+    if (emissionLoc != -1) {
+        glUniform3fv(emissionLoc, 1, glm::value_ptr(material.emission));
+    }
+    
+    // Configurar flags de textura
+    int hasTextureLoc = glGetUniformLocation(shaderProgram, "hasTexture");
+    int hasSpecularTextureLoc = glGetUniformLocation(shaderProgram, "hasSpecularTexture");
+    int hasNormalTextureLoc = glGetUniformLocation(shaderProgram, "hasNormalTexture");
+    
+    // Bind texturas
+    if (material.diffuseTextureID && hasTextureLoc != -1) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, material.diffuseTextureID);
+        int textureLoc = glGetUniformLocation(shaderProgram, "diffuseTexture");
+        glUniform1i(textureLoc, 0);
+        glUniform1i(hasTextureLoc, 1);
+    } else if (hasTextureLoc != -1) {
+        glUniform1i(hasTextureLoc, 0);
+    }
+    
+    if (material.specularTextureID && hasSpecularTextureLoc != -1) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, material.specularTextureID);
+        int specTextureLoc = glGetUniformLocation(shaderProgram, "specularTexture");
+        if (specTextureLoc != -1) {
+            glUniform1i(specTextureLoc, 1);
+        }
+        glUniform1i(hasSpecularTextureLoc, 1);
+    } else if (hasSpecularTextureLoc != -1) {
+        glUniform1i(hasSpecularTextureLoc, 0);
+    }
+    
+    if (material.normalTextureID && hasNormalTextureLoc != -1) {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, material.normalTextureID);
+        int normalTextureLoc = glGetUniformLocation(shaderProgram, "normalTexture");
+        if (normalTextureLoc != -1) {
+            glUniform1i(normalTextureLoc, 2);
+        }
+        glUniform1i(hasNormalTextureLoc, 1);
+    } else if (hasNormalTextureLoc != -1) {
+        glUniform1i(hasNormalTextureLoc, 0);
+    }
+}
+
+void Obj3D::addMaterial(const Material& material) {
+    materials.push_back(material);
+}
+
+bool Obj3D::updateMaterial(const std::string& name, const Material& newMaterial) {
+    for (auto& mat : materials) {
+        if (mat.name == name) {
+            mat = newMaterial;
+            mat.name = name; // Preservar o nome
+            return true;
+        }
+    }
+    return false;
+}
+
+void Obj3D::setDefaultMaterial() {
+    materials.clear();
+    materials.push_back(Material::getDefault());
+}
+
+void Obj3D::clearTextureCache() {
+    for (auto& pair : textureCache) {
+        glDeleteTextures(1, &pair.second);
+    }
+    textureCache.clear();
+}
+
+// Métodos utilitários para criar materiais procedurais
+
+Material Obj3D::createMetallicMaterial(const glm::vec3& color, float roughness) {
+    Material material;
+    material.name = "metallic";
+    material.ambient = color * 0.1f;
+    material.diffuse = color * 0.3f;
+    material.specular = glm::vec3(0.9f, 0.9f, 0.9f);
+    material.shininess = 1.0f / (roughness * roughness) * 128.0f;
+    material.emission = glm::vec3(0.0f);
+    return material;
+}
+
+Material Obj3D::createPlasticMaterial(const glm::vec3& color, float shininess) {
+    Material material;
+    material.name = "plastic";
+    material.ambient = color * 0.2f;
+    material.diffuse = color * 0.8f;
+    material.specular = glm::vec3(0.6f, 0.6f, 0.6f);
+    material.shininess = shininess;
+    material.emission = glm::vec3(0.0f);
+    return material;
+}
+
+Material Obj3D::createEmissiveMaterial(const glm::vec3& color, float intensity) {
+    Material material;
+    material.name = "emissive";
+    material.ambient = glm::vec3(0.0f);
+    material.diffuse = color * 0.5f;
+    material.specular = glm::vec3(0.0f);
+    material.shininess = 1.0f;
+    material.emission = color * intensity;
+    return material;
 }
