@@ -1,0 +1,17 @@
+# Arquivo de configuração da cena
+# Formato: nome caminhoDoModelo posX posY posZ rotX rotY rotZ escalaX escalaY escalaZ eliminavel
+# Rotações em radianos, eliminavel = true/false
+
+# Objetos eliminables (alvos)
+Target1 models/cube.obj -3.0 0.0 -2.0 0.0 0.0 0.0 1.0 1.0 1.0 true
+Target2 models/cube.obj 3.0 0.0 -2.0 0.0 0.785 0.0 1.0 1.0 1.0 true
+Target3 models/cube.obj 0.0 2.0 -4.0 0.0 0.0 0.0 0.8 0.8 0.8 true
+
+# Objetos não eliminables (obstáculos)
+Wall1 models/wall.obj -5.0 0.0 -6.0 0.0 0.0 0.0 1.0 3.0 1.0 false
+Wall2 models/wall.obj 5.0 0.0 -6.0 0.0 0.0 0.0 1.0 3.0 1.0 false
+Floor models/floor.obj 0.0 -1.0 0.0 0.0 0.0 0.0 10.0 0.1 10.0 false
+
+# Obstáculos refletores
+Mirror1 models/cube.obj -1.5 1.0 -1.0 0.0 0.0 0.0 0.5 2.0 0.1 false
+Mirror2 models/cube.obj 1.5 1.0 -1.0 0.0 0.0 0.0 0.5 2.0 0.1 false

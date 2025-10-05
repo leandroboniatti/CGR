@@ -1,0 +1,81 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "build",
+			"command": "g++",
+			"args": [
+				"-std=c++17",
+				"-g",
+				"-O2",
+				"-I./include",
+				"-I./Dependencies/GLAD/include",
+				"-I./Dependencies/GLFW/include",
+				"-I./Dependencies/GLM",
+				"-I./Dependencies/STB_IMAGE",
+				"src/*.cpp",
+				"Dependencies/GLAD/src/glad.c",
+				"Dependencies/STB_IMAGE/stb_image.cpp",
+				"-L./Dependencies/GLFW/lib-mingw-w64",
+				"-lglfw3",
+				"-lopengl32",
+				"-lgdi32",
+				"-o",
+				"visualizador3d.exe"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Compila o visualizador 3D",
+			"problemMatcher": "$gcc"
+		},
+		{
+			"type": "shell",
+			"label": "run",
+			"command": "./visualizador3d.exe",
+			"group": "test",
+			"detail": "Executa o visualizador 3D",
+			"dependsOn": "build"
+		},
+		{
+			"type": "shell",
+			"label": "clean",
+			"command": "del",
+			"args": [
+				"visualizador3d.exe"
+			],
+			"group": "build",
+			"detail": "Remove arquivos compilados"
+		},
+		{
+			"label": "build",
+			"type": "shell",
+			"command": "g++",
+			"args": [
+				"-std=c++17",
+				"-g",
+				"-O2",
+				"-I./include",
+				"-I./Dependencies/GLAD/include",
+				"-I./Dependencies/GLFW/include",
+				"-I./Dependencies/GLM",
+				"-I./Dependencies/STB_IMAGE",
+				"src/*.cpp",
+				"Dependencies/GLAD/src/glad.c",
+				"Dependencies/STB_IMAGE/stb_image.cpp",
+				"-L./Dependencies/GLFW/lib-mingw-w64",
+				"-lglfw3",
+				"-lopengl32",
+				"-lgdi32",
+				"-o",
+				"visualizador3d.exe"
+			],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

@@ -1,0 +1,10 @@
+# Material para ground.obj - Grama verde
+
+newmtl GroundGrass
+Ka 0.1 0.2 0.1
+Kd 0.3 0.7 0.3
+Ks 0.2 0.3 0.2
+Ke 0.0 0.0 0.0
+Ns 4.0
+d 1.0
+illum 2

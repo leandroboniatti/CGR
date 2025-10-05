@@ -1,0 +1,14 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "slevesque.shader",
+        "raczzalan.webgl-glsl-editor",
+        "ms-vscode.cmake-tools",
+        "vadimcn.vscode-lldb",
+        "webfreak.debug",
+        "jeff-hykin.better-cpp-syntax",
+        "ms-vscode.hexeditor",
+        "formulahendry.code-runner"
+    ]
+}

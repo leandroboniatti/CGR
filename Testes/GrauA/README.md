@@ -1,34 +1,71 @@
-# Desenvolvimento do GRAU A de CGR
+# Visualizador de Modelos 3D
 
-1. Nome completo dos integrantes.
-   
-   Ian Rossetti Boniatti e Eduardo Silva Tropea
+Aplicativo simples para visualização de modelos 3D no formato OBJ com funcionalidades de FPS.
 
+## Características
 
-2. Instruções para executar o programa.
-   
-   Rodar o arquivo "GrauA.cpp". Direcionar o camera com setas direita (ou D), esquerda (ou A), UP (ou W) e DOWN (ou S), coletando as moedas e desviando das bombas. Cada moeda coletada incrementa a pontuação. A cada cinco pontos incrementa uma vida e aumentamos a dificuldade através do incremento da velocidade dos itens. Cada colisão com bomba decresce uma vida. Número de vidas inicial = 5.
+- **Carregamento de modelos OBJ/MTL** com texturas
+- **Triangulação automática** de faces n-gon
+- **Sistema de câmera FPS** com controles WASD e mouse
+- **Sistema de tiros** com colisão e reflexão
+- **Objetos eliminais e indestrutíveis**
+- **Bounding box** para detecção de colisão
+- **Renderização com OpenGL 4.1+**
 
+## Controles
 
-3. Qualquer explicação adicional necessária sobre o funcionamento do código.
+- **W/↑**: Mover para frente
+- **S/↓**: Mover para trás  
+- **A/←**: Mover para esquerda
+- **D/→**: Mover para direita
+- **Mouse**: Olhar ao redor
+- **Espaço**: Disparar tiro
+- **ESC**: Sair
 
-   Se necessário, ajustar as velocidades em: "velMax , velMin , velInc".
-   Em alguns computadores a velocidade varia, portanto pode ser necessário encontrar a velocidade ideal para sua máquina.
+## Compilação
 
+### MinGW (Windows)
+```bash
+# No VS Code: Ctrl+Shift+P > Tasks: Run Task > build-mingw
+# Ou via terminal:
+g++ -std=c++17 -O2 -Wall -Iinclude -IDependencies/GLAD/include -IDependencies/GLFW/include -IDependencies/glm -IDependencies/stb_image src/*.cpp Dependencies/GLAD/src/glad.c -LDependencies/GLFW/lib-mingw-w64 -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32 -o ModelViewer.exe
+```
 
-4. Sprites utilizados foram baixados de craftpix.com e adaptados com PhotoShop
-   
-   background -> https://craftpix.net/freebies/free-nature-backgrounds-pixel-art/?num=1&count=179&sq=background%20parallax&pos=15
+### MSVC (Windows)
+```bash
+# No VS Code: Ctrl+Shift+P > Tasks: Run Task > build-msvc
+# Ou no Developer Command Prompt:
+cl /std:c++17 /EHsc /O2 /Iinclude /IDependencies/GLAD/include /IDependencies/GLFW/include /IDependencies/glm /IDependencies/stb_image src/*.cpp Dependencies/GLAD/src/glad.c /link opengl32.lib gdi32.lib user32.lib kernel32.lib Dependencies/GLFW/lib-vc2022/glfw3.lib /OUT:ModelViewer.exe
+```
 
-   character -> https://craftpix.net/freebies/free-pixel-art-tiny-hero-sprites/?num=1&count=201&sq=tiny%20hero&pos=5
+## Configuração de Cena
 
-   coin -> https://craftpix.net/freebies/free-game-coins-sprite-sheets/?num=1&count=102&sq=coin&pos=6
+Edite `assets/scene.cfg` para definir objetos na cena:
 
-   bomb -> https://craftpix.net/freebies/free-40-loot-icons-pixel-art/?num=3&count=102&sq=coin&pos=9
-   
-5. Exemplos de Saídas
+```
+# Formato: objPath eliminavel tx ty tz rx ry rz sx sy sz
+# eliminavel: 0=indestrutível, 1=eliminável
+assets/models/cube.obj 1 0 0 -5 0 0 0 1 1 1
+```
 
+## Estrutura de Classes
 
+Seguindo o padrão UML fornecido:
+- **System**: Gerenciador principal
+- **OBJReader**: Carregador de arquivos OBJ/MTL
+- **Mesh**: Dados geométricos
+- **Obj3D**: Objeto 3D na cena
+- **Group**: Grupo de faces com material
+- **Face**: Face triangular
+- **Material**: Propriedades do material
+- **Shader**: Programa shader OpenGL
+- **Texture**: Textura 2D
 
+## Dependências
 
+- GLAD (OpenGL loader)
+- GLFW (Window/Input)
+- GLM (Math)
+- stb_image (Image loading)
 
+Todas incluídas na pasta `Dependencies/`.

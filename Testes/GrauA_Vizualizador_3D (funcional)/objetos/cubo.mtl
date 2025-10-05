@@ -1,0 +1,12 @@
+# Arquivo de material para cubo.obj
+# cubo.mtl
+
+newmtl cuboMetalico
+Ka 0.1 0.1 0.15     // RGB <valor em R> <valor em G> <valor em B>
+Kd 0.3 0.3 0.4
+Ks 0.9 0.9 0.95
+Ke 0.0 0.0 0.0
+Ns 128.0            // <valor do expoente: shiness>
+#d 1.0
+#illum 2
+# map_Kd texture.png

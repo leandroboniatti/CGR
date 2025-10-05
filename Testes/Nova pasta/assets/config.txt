@@ -1,0 +1,8 @@
+# Arquivo de configuração dos objetos da cena
+# Formato: arquivo_obj pos_x pos_y pos_z rot_x rot_y rot_z scale_x scale_y scale_z eliminavel
+# Linhas iniciadas com # são comentários
+
+assets/models/cubo.obj 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 1.0 1
+assets/models/esfera.obj 3.0 0.0 -2.0 0.0 0.0 0.0 0.5 0.5 0.5 1
+assets/models/piramide.obj -3.0 0.0 -2.0 0.0 45.0 0.0 1.0 1.0 1.0 0
+assets/models/parede.obj 0.0 0.0 -5.0 0.0 0.0 0.0 10.0 3.0 0.5 0
