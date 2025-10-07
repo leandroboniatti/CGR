@@ -25,7 +25,7 @@ private:
     static std::string getDirectory(const std::string& filepath);
     
     static void parseFace(const std::string& faceStr, Face& face);
-    static void parseVertex(const std::string& line, std::vector<glm::vec3>& vertices);
+    static void parseVertice(const std::string& line, std::vector<glm::vec3>& vertices);
     static void parseTexCoord(const std::string& line, std::vector<glm::vec2>& texCoords);
     static void parseNormal(const std::string& line, std::vector<glm::vec3>& normals);
 };

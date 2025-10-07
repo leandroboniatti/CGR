@@ -13,7 +13,14 @@ Mesh::~Mesh() {
 
 bool Mesh::loadFromOBJ(const std::string& path) {
     cleanup();
-    
+
+    // Carrega dados do OBJ chamando loadOBJ, método estático da classe OBJReader.
+    // path - caminho do arquivo
+    // vertices - vetor com os vértices do modelo no formato VEC3
+    // texCoords - vetor com as coordenadas de textura no formato VEC2
+    // normals - vetor com as normais de cada face no formato VEC3
+    // groups - grupo de grupos - vetor com os grupos
+    // materials - mapa de materiais
     if (!OBJReader::loadOBJ(path, vertices, texCoords, normals, groups, materials)) {
         return false;
     }
@@ -76,10 +83,10 @@ void Mesh::calculateBoundingBox() {
         boundingBox.expand(vertex);
     }
     
-    std::cout << "Bounding box calculated: min(" << boundingBox.min.x << ", " 
-              << boundingBox.min.y << ", " << boundingBox.min.z << "), max(" 
-              << boundingBox.max.x << ", " << boundingBox.max.y << ", " 
-              << boundingBox.max.z << ")" << std::endl;
+    //std::cout << "Bounding box calculated: min(" << boundingBox.min.x << ", " 
+    //          << boundingBox.min.y << ", " << boundingBox.min.z << "), max(" 
+    //         << boundingBox.max.x << ", " << boundingBox.max.y << ", " 
+    //          << boundingBox.max.z << ")" << std::endl;
 }
 
 bool Mesh::rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, float& distance) const {
@@ -135,5 +142,5 @@ void Mesh::calculateNormals() {
         }
     }
     
-    std::cout << "Generated " << normals.size() << " vertex normals" << std::endl;
+    //std::cout << "Generated " << normals.size() << " vertex normals" << std::endl;
 }

@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <iostream>
 
+
 Bullet::Bullet() 
     : position(0.0f), direction(0.0f, 0.0f, 1.0f), speed(50.0f), 
       lifetime(0.0f), maxLifetime(5.0f), active(false), VAO(0), VBO(0) {
@@ -15,12 +16,12 @@ Bullet::Bullet(const glm::vec3& startPos, const glm::vec3& dir, float bulletSpee
 }
 
 Bullet::~Bullet() {
-    cleanup();
+    cleanup();  // libera recursos da OpenGL
 }
 
 void Bullet::update(float deltaTime) {
     if (!active) return;
-    
+    // Atualiza a posição do projétil e verifica se deve ser desativado
     position += direction * speed * deltaTime;
     lifetime += deltaTime;
     
@@ -29,29 +30,29 @@ void Bullet::update(float deltaTime) {
     }
 }
 
-void Bullet::render(const Shader& shader) const {
+void Bullet::draw(const Shader& shader) const {
     if (!active || VAO == 0) return;
     
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
-    model = glm::scale(model, glm::vec3(0.05f)); // Small bullet size
+    model = glm::scale(model, glm::vec3(0.05f)); // Pequeno tamanho do projétil
     
     shader.setMat4("model", model);
-    shader.setVec3("objectColor", 1.0f, 1.0f, 0.0f); // Yellow bullet
-    
+    shader.setVec3("objectColor", 1.0f, 1.0f, 0.0f); // Projétil amarelo
+
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36); // Cube has 36 vertices
+    glDrawArrays(GL_TRIANGLES, 0, 36); // Cubo tem 36 vértices
     glBindVertexArray(0);
 }
 
 void Bullet::reflect(const glm::vec3& normal) {
-    // Reflect the direction vector
+    // calcula a direção do vetor de reflexão
     direction = direction - 2.0f * glm::dot(direction, normal) * normal;
     direction = glm::normalize(direction);
 }
 
 void Bullet::setupMesh() {
-    // Simple cube vertices for bullet visualization
+    // Para visualização de projétil, usamos um cubo simples - 36 vértices
     float vertices[] = {
         // positions
         -0.5f, -0.5f, -0.5f,
@@ -112,7 +113,7 @@ void Bullet::setupMesh() {
     glBindVertexArray(0);
 }
 
-void Bullet::cleanup() {
+void Bullet::cleanup() {    // libera recursos da OpenGL
     if (VAO != 0) {
         glDeleteVertexArrays(1, &VAO);
         VAO = 0;

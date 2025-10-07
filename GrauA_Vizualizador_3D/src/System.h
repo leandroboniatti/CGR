@@ -14,18 +14,23 @@
 #include "OBJ3D.h"
 #include "Bullet.h"
 
+using namespace std;	// Para não precisar digitar std:: na frente de comandos da biblioteca
+using namespace glm;	// Para não precisar digitar glm:: na frente de comandos da biblioteca
+
+
+// Estrutura para armazenar informações sobre um determinado objeto 3D
 struct ObjectConfig {
-    std::string name;
-    std::string modelPath;
-    glm::vec3 position;
-    glm::vec3 rotation;
-    glm::vec3 scale;
-    bool eliminable;
+    string name;        
+    string modelPath;   // Caminho para o arquivo .obj
+    vec3 position;      // Posição atual do objeto na cena
+    vec3 rotation;      // Rotação aplicada ao objeto
+    vec3 scale;         // Escala/Dimensões do objeto
+    bool eliminable;    // Se o objeto pode ser eliminado por um tiro
 };
 
 class System {
 public:
-    // Window settings
+    // Configurações da janela
     static const unsigned int SCREEN_WIDTH = 1024;
     static const unsigned int SCREEN_HEIGHT = 768;
     
@@ -45,16 +50,16 @@ private:
     std::vector<std::unique_ptr<OBJ3D>> sceneObjects;
     std::vector<std::unique_ptr<Bullet>> bullets;
     
-    // Timing
+    // Temporização
     float deltaTime;
     float lastFrame;
     
-    // Input
+    // Entrada
     bool keys[1024];
     bool firstMouse;
     float lastX, lastY;
     
-    // Lighting
+    // Iluminação
     glm::vec3 lightPos;
     glm::vec3 lightColor;
     
@@ -77,7 +82,7 @@ private:
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
     
-    // Helper functions
+    // Funções auxiliares
     void setupLighting();
     std::vector<ObjectConfig> loadConfiguration();
     void positionObjectsInScene();

@@ -8,15 +8,16 @@ Face::Face(const std::vector<unsigned int>& vIndices,
     : vertexIndices(vIndices), textureIndices(tIndices), normalIndices(nIndices) {}
 
 std::vector<Face> Face::triangulate() const {
-    std::vector<Face> triangles;
+
+    std::vector<Face> faces_triangulares = {};   // Vetor para armazenar as faces triangulares
     
-    if (vertexIndices.size() < 3) {
-        return triangles;
-    }
-    
+    // se a face tem menos de 3 vértices, não é possível formar um triângulo
+    if (vertexIndices.size()  < 3) { return faces_triangulares; }
+
+    // Se a face já é um triângulo, retorna ela mesma
     if (vertexIndices.size() == 3) {
-        triangles.push_back(*this);
-        return triangles;
+        faces_triangulares.push_back(*this);
+        return faces_triangulares;
     }
     
     // Triangulação usando fan triangulation
@@ -32,8 +33,8 @@ std::vector<Face> Face::triangulate() const {
             triNormals = {normalIndices[0], normalIndices[i], normalIndices[i + 1]};
         }
         
-        triangles.emplace_back(triVertices, triTextures, triNormals);
+        faces_triangulares.emplace_back(triVertices, triTextures, triNormals);
     }
-    
-    return triangles;
+
+    return faces_triangulares;
 }

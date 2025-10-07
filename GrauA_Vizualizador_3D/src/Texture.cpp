@@ -14,7 +14,7 @@ unsigned int Texture::loadFromFile(const char* path) {
     unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
     
     if (data) {
-        GLenum format = GL_RGB; // Default format
+        GLenum format = GL_RGB; // Formato padrão
         if (nrComponents == 1)
             format = GL_RED;
         else if (nrComponents == 3)
@@ -32,9 +32,9 @@ unsigned int Texture::loadFromFile(const char* path) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         
         stbi_image_free(data);
-        std::cout << "Texture loaded: " << path << std::endl;
+        std::cout << "Textura carregada: " << path << std::endl;
     } else {
-        std::cout << "Failed to load texture: " << path << std::endl;
+        std::cout << "Falha ao carregar textura: " << path << std::endl;
         stbi_image_free(data);
     }
     
@@ -45,7 +45,7 @@ unsigned int Texture::createTexture(int width, int height, unsigned char* data, 
     unsigned int textureID;
     glGenTextures(1, &textureID);
     
-    GLenum format = GL_RGB; // Default format
+    GLenum format = GL_RGB; // Formato padrão
     if (channels == 1)
         format = GL_RED;
     else if (channels == 3)

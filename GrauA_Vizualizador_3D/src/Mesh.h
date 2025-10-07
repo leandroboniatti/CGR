@@ -33,11 +33,11 @@ struct BoundingBox {
 
 class Mesh {
 public:
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec2> texCoords;
-    std::vector<glm::vec3> normals;
-    std::vector<Group> groups;
-    std::map<std::string, Material> materials;
+    std::vector<glm::vec3> vertices;  // Vetor com os vértices do objeto 3D
+    std::vector<glm::vec2> texCoords; // Vetor com as coordenadas de textura do objeto 3D
+    std::vector<glm::vec3> normals;   // Vetor com as normais do objeto 3D
+    std::vector<Group> groups;        // Grupos que compõem a malha
+    std::map<std::string, Material> materials;  // Mapa de materiais que podem ser usados pelos objetos 3D
     
     BoundingBox boundingBox;
     

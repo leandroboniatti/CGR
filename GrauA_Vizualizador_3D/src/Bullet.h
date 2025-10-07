@@ -5,33 +5,34 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Shader.h"
 
+using namespace glm;
+
 class Bullet {
 public:
-    glm::vec3 position;
-    glm::vec3 direction;
+    vec3 position;
+    vec3 direction;
     float speed;
     float lifetime;
     float maxLifetime;
     bool active;
     
-    // Rendering
+    // Renderização
     unsigned int VAO, VBO;
     
     Bullet();
-    Bullet(const glm::vec3& startPos, const glm::vec3& dir, float bulletSpeed = 50.0f, float maxLife = 5.0f);
+    Bullet(const vec3& startPos, const vec3& dir, float bulletSpeed = 5.0f, float maxLife = 5.0f);
     ~Bullet();
     
     void update(float deltaTime);
-    void render(const Shader& shader) const;
+    void draw(const Shader& shader) const;
     bool isActive() const { return active && lifetime < maxLifetime; }
-    
     void reflect(const glm::vec3& normal);
     void deactivate() { active = false; }
     
-    // Ray representation for collision
-    glm::vec3 getRayOrigin() const { return position; }
-    glm::vec3 getRayDirection() const { return glm::normalize(direction); }
-    
+    // Representação do raio para colisão
+    vec3 getRayOrigin() const { return position; }
+    vec3 getRayDirection() const { return normalize(direction); }
+
 private:
     void setupMesh();
     void cleanup();

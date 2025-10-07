@@ -15,7 +15,7 @@ public:
          const std::vector<unsigned int>& tIndices = {},
          const std::vector<unsigned int>& nIndices = {});
     
-    // Converte face com 4+ vértices em triângulos
+    // Converte face com 4 ou mais vértices em triângulos
     std::vector<Face> triangulate() const;
     
     bool isTriangle() const { return vertexIndices.size() == 3; }

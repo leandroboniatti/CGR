@@ -4,7 +4,7 @@
 #include <sstream>
 #include <algorithm>
 
-// Static variables for input handling
+// Variáveis estáticas para controle de entrada
 static System* systemInstance = nullptr;
 static bool shootPressed = false;
 
@@ -14,57 +14,56 @@ System::System()
       deltaTime(0.0f),
       lastFrame(0.0f),
       firstMouse(true),
-      lastX(SCREEN_WIDTH / 2.0f),
+      lastX(SCREEN_WIDTH  / 2.0f),
       lastY(SCREEN_HEIGHT / 2.0f),
-      lightPos(5.0f, 10.0f, 5.0f),
-      lightColor(1.0f, 1.0f, 1.0f) {
+      lightPos  (5.0f, 10.0f, 5.0f),
+      lightColor(1.0f,  1.0f, 1.0f)
+      
+    {
     
     systemInstance = this;
-    
-    // Initialize keys array
-    for (int i = 0; i < 1024; i++) {
-        keys[i] = false;
-    }
+
+    // Inicializando o array de controle das teclas
+    for (int i = 0; i < 1024; i++) { keys[i] = false; }
 }
 
-System::~System() {
-    shutdown();
-}
+System::~System() { shutdown(); }
+
 
 bool System::initialize() {
     if (!initializeGLFW()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
+        std::cerr << "Falha ao inicializar GLFW" << std::endl;
         return false;
     }
     
     if (!initializeOpenGL()) {
-        std::cerr << "Failed to initialize OpenGL" << std::endl;
+        std::cerr << "Falha ao inicializar OpenGL" << std::endl;
         return false;
     }
     
     if (!loadShaders()) {
-        std::cerr << "Failed to load shaders" << std::endl;
+        std::cerr << "Falha ao carregar shaders" << std::endl;
         return false;
     }
     
     if (!loadSceneObjects()) {
-        std::cerr << "Failed to load scene objects" << std::endl;
+        std::cerr << "Falha ao carregar objetos da cena" << std::endl;
         return false;
     }
     
     setupLighting();
     
-    std::cout << "System initialized successfully" << std::endl;
+    std::cout << "Sistema inicializado com sucesso" << std::endl;
     return true;
 }
 
 void System::run() {
-    std::cout << "Starting main loop..." << std::endl;
-    std::cout << "Controls:" << std::endl;
-    std::cout << "  WASD/Arrow Keys: Move camera" << std::endl;
-    std::cout << "  Mouse: Look around" << std::endl;
-    std::cout << "  SPACE: Shoot" << std::endl;
-    std::cout << "  ESC: Exit" << std::endl;
+    std::cout << "Iniciando loop principal..." << std::endl;
+    std::cout << "Controles:" << std::endl;
+    std::cout << "  WASD/Setas: Mover camera" << std::endl;
+    std::cout << "  Mouse: Olhar ao redor" << std::endl;
+    std::cout << "  ESPAÇO: Atirar" << std::endl;
+    std::cout << "  ESC: Sair" << std::endl;
     
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -90,7 +89,7 @@ void System::shutdown() {
     }
     glfwTerminate();
     
-    std::cout << "System shutdown complete" << std::endl;
+    std::cout << "Desligamento do sistema concluido" << std::endl;
 }
 
 bool System::initializeGLFW() {
@@ -101,7 +100,7 @@ bool System::initializeGLFW() {
     
     window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Visualizador 3D - CGR", NULL, NULL);
     if (!window) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
+        std::cerr << "Falha ao criar janela GLFW" << std::endl;
         glfwTerminate();
         return false;
     }
@@ -112,7 +111,7 @@ bool System::initializeGLFW() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
     
-    // Capture mouse
+    // Capturar mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     return true;
@@ -120,22 +119,22 @@ bool System::initializeGLFW() {
 
 bool System::initializeOpenGL() {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
+        std::cerr << "Falha ao inicializar GLAD" << std::endl;
         return false;
     }
     
     glEnable(GL_DEPTH_TEST);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     
-    // Print OpenGL info
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    // Imprimir informações do OpenGL
+    std::cout << "Versao OpenGL: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "Versao GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     
     return true;
 }
 
 bool System::loadShaders() {
-    // Load main shader from embedded code
+    // Carregar shader principal do código incorporado
     std::string vertexShaderSource = R"(
         #version 400 core
         layout (location = 0) in vec3 aPos;
@@ -261,7 +260,7 @@ bool System::loadSceneObjects() {
     auto configs = loadConfiguration();
     
     if (configs.empty()) {
-        std::cout << "No configuration found, creating default scene..." << std::endl;
+        std::cout << "Nenhuma configuracao encontrada, criando cena padrao..." << std::endl;
         
         // Create some default objects if no config is found
         configs = {
@@ -282,16 +281,16 @@ bool System::loadSceneObjects() {
             obj->setEliminable(config.eliminable);
             
             sceneObjects.push_back(std::move(obj));
-            std::cout << "Loaded object: " << config.name << std::endl;
+            std::cout << "Objeto carregado: " << config.name << std::endl;
         } else {
-            std::cout << "Failed to load object: " << config.name 
-                      << " from " << config.modelPath << std::endl;
+            std::cout << "Falha ao carregar objeto: " << config.name 
+                      << " de " << config.modelPath << std::endl;
         }
     }
     
     positionObjectsInScene();
     
-    std::cout << "Scene loaded with " << sceneObjects.size() << " objects" << std::endl;
+    std::cout << "Cena carregada com " << sceneObjects.size() << " objetos" << std::endl;
     return true;
 }
 
@@ -358,7 +357,7 @@ void System::render() {
     
     for (const auto& bullet : bullets) {
         if (bullet->isActive()) {
-            bullet->render(bulletShader);
+            bullet->draw(bulletShader);
         }
     }
 }
@@ -370,8 +369,8 @@ void System::handleShooting() {
     auto bullet = std::make_unique<Bullet>(bulletPos, bulletDir, 50.0f, 10.0f);
     bullets.push_back(std::move(bullet));
     
-    std::cout << "Bullet fired from position: (" << bulletPos.x << ", " 
-              << bulletPos.y << ", " << bulletPos.z << ")" << std::endl;
+    //std::cout << "Tiro disparado da posição: (" << bulletPos.x << ", " 
+    //          << bulletPos.y << ", " << bulletPos.z << ")" << std::endl;
 }
 
 void System::updateBullets() {
@@ -381,7 +380,7 @@ void System::updateBullets() {
         }
     }
     
-    // Remove inactive bullets
+    // Remove projeteis inativos
     bullets.erase(std::remove_if(bullets.begin(), bullets.end(),
                                 [](const std::unique_ptr<Bullet>& bullet) {
                                     return !bullet->isActive();
@@ -396,7 +395,7 @@ void System::checkCollisions() {
             float distance;
             if ((*it)->rayIntersect(bullet->getRayOrigin(), bullet->getRayDirection(), distance)) {
                 if ((*it)->isEliminable()) {
-                    std::cout << "Object \"" << (*it)->name << "\" eliminated!" << std::endl;
+                    std::cout << "Objeto \"" << (*it)->name << "\" eliminado!" << std::endl;
                     it = sceneObjects.erase(it);
                     bullet->deactivate();
                 } else {
@@ -407,7 +406,7 @@ void System::checkCollisions() {
                     glm::vec3 normal = glm::normalize(hitPoint - center);
                     
                     bullet->reflect(normal);
-                    std::cout << "Bullet reflected off \"" << (*it)->name << "\"!" << std::endl;
+                    std::cout << "Tiro refletiu em \"" << (*it)->name << "\"!" << std::endl;
                     ++it;
                 }
                 break;
@@ -428,7 +427,7 @@ std::vector<ObjectConfig> System::loadConfiguration() {
     
     std::ifstream configFile("scene_config.txt");
     if (!configFile.is_open()) {
-        std::cout << "No scene configuration file found (scene_config.txt)" << std::endl;
+        std::cout << "Arquivo de configuração da cena não encontrado (scene_config.txt)" << std::endl;
         return configs;
     }
     
@@ -436,7 +435,7 @@ std::vector<ObjectConfig> System::loadConfiguration() {
     while (std::getline(configFile, line)) {
         if (line.empty() || line[0] == '#') continue;
         
-        // Parse line: name modelPath posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ eliminable
+        // Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ eliminable
         std::istringstream iss(line);
         ObjectConfig config;
         std::string eliminableStr;
@@ -453,7 +452,7 @@ std::vector<ObjectConfig> System::loadConfiguration() {
     }
     
     configFile.close();
-    std::cout << "Loaded " << configs.size() << " object configurations" << std::endl;
+    std::cout << "Carregadas " << configs.size() << " configurações de objetos" << std::endl;
     return configs;
 }
 
