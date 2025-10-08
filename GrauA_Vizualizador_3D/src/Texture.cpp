@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stb_image.h>
 
-unsigned int Texture::loadTexture(const std::string& path) {
+unsigned int Texture::loadTexture(const string& path) {
     return loadFromFile(path.c_str());
 }
 
@@ -32,13 +32,13 @@ unsigned int Texture::loadFromFile(const char* path) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         
         stbi_image_free(data);
-        std::cout << "Textura carregada: " << path << std::endl;
+        cout << "Textura carregada: " << path << endl;
+        return textureID;
     } else {
-        std::cout << "Falha ao carregar textura: " << path << std::endl;
-        stbi_image_free(data);
+        cout << "Falha ao carregar textura: " << path << endl;
+        glDeleteTextures(1, &textureID);
+        return 0;
     }
-    
-    return textureID;
 }
 
 unsigned int Texture::createTexture(int width, int height, unsigned char* data, int channels) {

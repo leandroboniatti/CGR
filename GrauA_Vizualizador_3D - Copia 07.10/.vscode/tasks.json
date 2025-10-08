@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Visualizador 3D",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                //"-Wall",
+                //"-Wextra",
+                //"-O2",
+                "-g",
+                "-Isrc/",
+                "-IDependencies/GLAD/include",
+                "-IDependencies/GLFW/include",
+                "-IDependencies/glm",
+                "-IDependencies/stb_image",
+                "main.cpp",
+                "src/Face.cpp",
+                "src/Material.cpp",
+                "src/Texture.cpp",
+                "src/Group.cpp",
+                "src/Shader.cpp",
+                "src/OBJReader.cpp",
+                "src/Mesh.cpp",
+                "src/OBJ3D.cpp",
+                "src/Camera.cpp",
+                "src/Projetil.cpp",
+                "src/System.cpp",
+                "Dependencies/GLAD/src/glad.c",
+                "Dependencies/stb_image/stb_image.cpp",
+                "-LDependencies/GLFW/lib-mingw-w64",
+                "-lglfw3",
+                "-lopengl32",
+                "-lgdi32",
+                "-luser32",
+                "-lkernel32",
+                "-o",
+                "visualizador3d.exe"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+    ]
+}

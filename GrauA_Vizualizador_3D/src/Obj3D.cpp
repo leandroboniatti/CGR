@@ -3,40 +3,55 @@
 
 OBJ3D::OBJ3D() 
     : transform(1.0f), 
-      position(0.0f), 
-      rotation(0.0f), 
-      scale(1.0f), 
+      position (0.0f), 
+      rotation (0.0f), 
+      scale    (1.0f), 
       eliminable(true), 
-      name("") {
-    updateTransform();
-}
+      name(""),
+      textureID(0),
+      hasTexture(false)
+    { updateTransform(); }
 
-OBJ3D::OBJ3D(const std::string& objName)
+OBJ3D::OBJ3D(string& objName)
     : transform(1.0f),
-      position(0.0f),
-      rotation(0.0f),
-      scale(1.0f),
+      position (0.0f),
+      rotation (0.0f),
+      scale    (1.0f),
       eliminable(true),
-      name(objName) {
-    updateTransform();
-}
+      name(objName),
+      textureID(0),
+      hasTexture(false)
+    { updateTransform(); }
 
-OBJ3D::~OBJ3D() {
-    mesh.cleanup();
-}
+OBJ3D::~OBJ3D() { mesh.cleanup(); }
 
-bool OBJ3D::loadFromFile(const std::string& path) {
-    if (!mesh.loadFromOBJ(path)) {
-        std::cerr << "Failed to load OBJ file: " << path << std::endl;
+bool OBJ3D::readFile(string& path) {
+    
+    if (!mesh.readOBJ(path)) {
+        cerr << "Falha ao carregar arquivo OBJ: " << path << endl;
         return false;
     }
-    
-    std::cout << "OBJ3D \"" << name << "\" loaded successfully from: " << path << std::endl;
+
+    cout << "Arquivo OBJ3D \"" << name << "\" carregado com sucesso de: " << path << endl;
     return true;
 }
 
 void OBJ3D::render(const Shader& shader) const {
     shader.setMat4("model", transform);
+    
+    // Set texture uniforms
+    if (hasTexture) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        shader.setBool("hasDiffuseMap", true);
+        shader.setInt("diffuseMap", 0);
+    } else {
+        shader.setBool("hasDiffuseMap", false);
+    }
+    
+    // Set default object color
+    shader.setVec3("objectColor", glm::vec3(0.7f, 0.7f, 0.7f));
+    
     mesh.render(shader);
 }
 
@@ -57,6 +72,21 @@ void OBJ3D::setScale(const glm::vec3& scl) {
 
 void OBJ3D::setEliminable(bool canEliminate) {
     eliminable = canEliminate;
+}
+
+void OBJ3D::setTexture(const string& texturePath) {
+    if (!texturePath.empty()) {
+        textureID = Texture::loadTexture(texturePath);
+        hasTexture = (textureID != 0);
+        if (hasTexture) {
+            cout << "Textura carregada para objeto \"" << name << "\": " << texturePath << endl;
+        } else {
+            cerr << "Falha ao carregar textura para objeto \"" << name << "\": " << texturePath << endl;
+        }
+    } else {
+        hasTexture = false;
+        textureID = 0;
+    }
 }
 
 void OBJ3D::translate(const glm::vec3& offset) {

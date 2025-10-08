@@ -11,56 +11,44 @@ Mesh::~Mesh() {
     cleanup();
 }
 
-bool Mesh::loadFromOBJ(const std::string& path) {
-    cleanup();
+bool Mesh::readOBJ(string& path) {
+    //cleanup();
 
     // Carrega dados do OBJ chamando loadOBJ, método estático da classe OBJReader.
-    // path - caminho do arquivo
-    // vertices - vetor com os vértices do modelo no formato VEC3
-    // texCoords - vetor com as coordenadas de textura no formato VEC2
-    // normals - vetor com as normais de cada face no formato VEC3
-    // groups - grupo de grupos - vetor com os grupos
-    // materials - mapa de materiais
-    if (!OBJReader::loadOBJ(path, vertices, texCoords, normals, groups, materials)) {
+    // Este, por sua vez, preenche os vetores e mapas passados por referência.
+    // path - caminho do arquivo, recebido como parâmetro
+    // vertices - vetor com os vértices do modelo, no formato VEC3, definido na classe Mesh
+    // texCoords - vetor com as coordenadas de textura, no formato VEC2, definido na classe Mesh
+    // normals - vetor com as normais de cada face no formato VEC3, definido na classe Mesh
+    // groups - grupo de grupos - vetor com os grupos, definido na classe Mesh
+    // map<string, Material> emptyMaterials; // Mapa vazio, não usaremos materiais
+    if (!OBJReader::loadOBJ(path, vertices, texCoords, normals, groups)) {
         return false;
     }
     
     // Gerar normais se não existirem
-    if (normals.empty()) {
-        calculateNormals();
-    }
+    //if (normals.empty()) { calculateNormals(); }
     
+    // Calcula a bounding box da malha
     calculateBoundingBox();
-    setupBuffers();
+
+    // Configura buffers OpenGL (VBOs, VAOs) para cada grupo da malha
+    for (auto& group : groups) { group.setupBuffers(vertices, texCoords, normals);}
+    //setupBuffers();
     
     return true;
 }
 
-void Mesh::setupBuffers() {
-    for (auto& group : groups) {
-        group.setupBuffers(vertices, texCoords, normals);
-    }
-    
-    std::cout << "Mesh buffers setup complete" << std::endl;
-}
+// Configura buffers OpenGL (VBOs, VAOs) para cada grupo da malha
+//void Mesh::setupBuffers() {
+//    for (auto& group : groups) { group.setupBuffers(vertices, texCoords, normals);}
+//    
+//    cout << "Mesh buffers setup complete" << endl;
+//}
 
 void Mesh::render(const Shader& shader) const {
     for (const auto& group : groups) {
-        // Set material uniforms
-        shader.setVec3("material.ambient", group.material.ambient);
-        shader.setVec3("material.diffuse", group.material.diffuse);
-        shader.setVec3("material.specular", group.material.specular);
-        shader.setFloat("material.shininess", group.material.shininess);
-        
-        // Set texture uniforms
-        shader.setInt("material.diffuseMap", 0);
-        shader.setInt("material.specularMap", 1);
-        shader.setInt("material.normalMap", 2);
-        
-        shader.setBool("material.hasDiffuseMap", group.material.diffuseTextureID != 0);
-        shader.setBool("material.hasSpecularMap", group.material.specularTextureID != 0);
-        shader.setBool("material.hasNormalMap", group.material.normalTextureID != 0);
-        
+        // Don't override texture uniforms set by OBJ3D
         group.render();
     }
 }
@@ -73,7 +61,6 @@ void Mesh::cleanup() {
     vertices.clear();
     texCoords.clear();
     normals.clear();
-    materials.clear();
 }
 
 void Mesh::calculateBoundingBox() {
