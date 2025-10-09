@@ -26,7 +26,7 @@ OBJ3D::OBJ3D(string& objName)
 OBJ3D::~OBJ3D() { mesh.cleanup(); }
 
 bool OBJ3D::readFile(string& path) {
-    
+
     if (!mesh.readOBJ(path)) {
         cerr << "Falha ao carregar arquivo OBJ: " << path << endl;
         return false;
@@ -148,4 +148,28 @@ bool OBJ3D::rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirecti
     glm::vec4 localDirection = invTransform * glm::vec4(rayDirection, 0.0f);
     
     return mesh.rayIntersect(glm::vec3(localOrigin), glm::normalize(glm::vec3(localDirection)), distance);
+}
+
+bool OBJ3D::continuousRayIntersect(const glm::vec3& rayStart, const glm::vec3& rayEnd,
+                                  float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const {
+    // Transform ray to object space
+    glm::mat4 invTransform = glm::inverse(transform);
+    glm::vec4 localStart = invTransform * glm::vec4(rayStart, 1.0f);
+    glm::vec4 localEnd = invTransform * glm::vec4(rayEnd, 1.0f);
+    
+    glm::vec3 localHitPoint, localHitNormal;
+    
+    if (mesh.continuousRayIntersect(glm::vec3(localStart), glm::vec3(localEnd), 
+                                   distance, localHitPoint, localHitNormal)) {
+        // Transform hit point and normal back to world space
+        glm::vec4 worldHitPoint = transform * glm::vec4(localHitPoint, 1.0f);
+        glm::vec4 worldHitNormal = glm::transpose(invTransform) * glm::vec4(localHitNormal, 0.0f);
+        
+        hitPoint = glm::vec3(worldHitPoint);
+        hitNormal = glm::normalize(glm::vec3(worldHitNormal));
+        
+        return true;
+    }
+    
+    return false;
 }

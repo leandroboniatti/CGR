@@ -53,9 +53,17 @@ public:
     void calculateBoundingBox();
     bool rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, 
                      float& distance) const;
+    bool rayIntersectPrecise(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
+                            float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const;
+    bool continuousRayIntersect(const glm::vec3& rayStart, const glm::vec3& rayEnd,
+                               float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const;
     
 private:
     void calculateNormals();
+    bool rayTriangleIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
+                             const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
+                             float& distance, glm::vec3& hitPoint) const;
+    glm::vec3 calculateFaceNormal(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) const;
 };
 
 #endif

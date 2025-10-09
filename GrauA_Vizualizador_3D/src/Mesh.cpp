@@ -131,3 +131,119 @@ void Mesh::calculateNormals() {
     
     //std::cout << "Generated " << normals.size() << " vertex normals" << std::endl;
 }
+
+bool Mesh::rayIntersectPrecise(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
+                              float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const {
+    // Primeiro verifica colisão com bounding box
+    if (!rayIntersect(rayOrigin, rayDirection, distance)) {
+        return false;
+    }
+    
+    float closestDistance = FLT_MAX;
+    glm::vec3 closestHitPoint;
+    glm::vec3 closestNormal;
+    bool hitFound = false;
+    
+    // Testa intersecção com todas as faces
+    for (const auto& group : groups) {
+        for (const auto& face : group.faces) {
+            if (face.vertexIndices.size() >= 3) {
+                // Pega os vértices da face (triângulo)
+                glm::vec3 v0 = vertices[face.vertexIndices[0] - 1];
+                glm::vec3 v1 = vertices[face.vertexIndices[1] - 1];
+                glm::vec3 v2 = vertices[face.vertexIndices[2] - 1];
+                
+                float faceDistance;
+                glm::vec3 faceHitPoint;
+                
+                if (rayTriangleIntersect(rayOrigin, rayDirection, v0, v1, v2, faceDistance, faceHitPoint)) {
+                    if (faceDistance < closestDistance) {
+                        closestDistance = faceDistance;
+                        closestHitPoint = faceHitPoint;
+                        closestNormal = calculateFaceNormal(v0, v1, v2);
+                        hitFound = true;
+                    }
+                }
+            }
+        }
+    }
+    
+    if (hitFound) {
+        distance = closestDistance;
+        hitPoint = closestHitPoint;
+        hitNormal = closestNormal;
+        return true;
+    }
+    
+    return false;
+}
+
+bool Mesh::continuousRayIntersect(const glm::vec3& rayStart, const glm::vec3& rayEnd,
+                                 float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const {
+    glm::vec3 direction = rayEnd - rayStart;
+    float rayLength = glm::length(direction);
+    
+    if (rayLength == 0.0f) return false;
+    
+    direction = glm::normalize(direction);
+    
+    float intersectDistance;
+    if (rayIntersectPrecise(rayStart, direction, intersectDistance, hitPoint, hitNormal)) {
+        if (intersectDistance <= rayLength) {
+            distance = intersectDistance;
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool Mesh::rayTriangleIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
+                               const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
+                               float& distance, glm::vec3& hitPoint) const {
+    const float EPSILON = 0.0000001f;
+    
+    glm::vec3 edge1, edge2, h, s, q;
+    float a, f, u, v;
+    
+    edge1 = v1 - v0;
+    edge2 = v2 - v0;
+    h = glm::cross(rayDirection, edge2);
+    a = glm::dot(edge1, h);
+    
+    if (a > -EPSILON && a < EPSILON) {
+        return false; // Ray is parallel to triangle
+    }
+    
+    f = 1.0f / a;
+    s = rayOrigin - v0;
+    u = f * glm::dot(s, h);
+    
+    if (u < 0.0f || u > 1.0f) {
+        return false;
+    }
+    
+    q = glm::cross(s, edge1);
+    v = f * glm::dot(rayDirection, q);
+    
+    if (v < 0.0f || u + v > 1.0f) {
+        return false;
+    }
+    
+    // Calculate where the intersection point is on the line
+    float t = f * glm::dot(edge2, q);
+    
+    if (t > EPSILON) { // Ray intersection
+        distance = t;
+        hitPoint = rayOrigin + rayDirection * t;
+        return true;
+    }
+    
+    return false; // Line intersection but not ray intersection
+}
+
+glm::vec3 Mesh::calculateFaceNormal(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) const {
+    glm::vec3 edge1 = v1 - v0;
+    glm::vec3 edge2 = v2 - v0;
+    return glm::normalize(glm::cross(edge1, edge2));
+}

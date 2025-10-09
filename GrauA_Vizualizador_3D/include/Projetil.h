@@ -31,6 +31,7 @@ public:
     // Representação do raio para colisão
     glm::vec3 getRayOrigin() const { return position; }
     glm::vec3 getRayDirection() const { return glm::normalize(direction); }
+    float getSpeed() const { return speed; }
 
 private:
     void setupMesh();

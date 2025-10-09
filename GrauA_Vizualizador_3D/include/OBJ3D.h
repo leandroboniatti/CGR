@@ -20,7 +20,7 @@ public:
     glm::vec3 scale;
     
     bool eliminable;
-    string name;
+    string name, modelPath, texturePath;
     
     // Texture support
     unsigned int textureID;
@@ -51,6 +51,8 @@ public:
 
     BoundingBox getTransformedBoundingBox() const;
     bool rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, float& distance) const;
+    bool continuousRayIntersect(const glm::vec3& rayStart, const glm::vec3& rayEnd,
+                               float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const;
 
 private:
     void updateTransform();

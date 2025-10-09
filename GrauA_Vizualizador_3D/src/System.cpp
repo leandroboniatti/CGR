@@ -25,52 +25,7 @@ System::System() : window(nullptr),
 System::~System() { shutdown(); }
 
 
-bool System::initialize() {
-    if (!initializeGLFW()) {
-        cerr << "Falha ao inicializar GLFW" << endl;
-        return false;
-    }
-    
-    if (!initializeOpenGL()) {
-        cerr << "Falha ao inicializar OpenGL" << endl;
-        return false;
-    }
-    
-    if (!loadShaders()) {
-        cerr << "Falha ao carregar shaders" << endl;
-        return false;
-    }
-    
-    if (!loadSceneObjects()) {
-        cerr << "Falha ao carregar objetos da cena" << endl;
-        return false;
-    }
 
-    cout << "Sistema inicializado com sucesso" << endl;
-    return true;
-}
-
-void System::run() {
-    cout << "Iniciando loop principal..." << endl;
-    cout << "Controles:" << endl;
-    cout << "  WASD/Setas: Mover camera" << endl;
-    cout << "  Mouse: Olhar ao redor" << endl;
-    cout << "  ESPAÇO: Atirar" << endl;
-    cout << "  ESC: Sair" << endl;
-    
-    while (!glfwWindowShouldClose(window)) {
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        
-        processInput();
-        update();
-        render();
-        
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-}
 
 void System::shutdown() {
     sceneObjects.clear();
@@ -86,23 +41,30 @@ void System::shutdown() {
 }
 
 bool System::initializeGLFW() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
+    // GLFW: Inicialização e configurações de versão do OpenGL
+    glfwInit(); // Inicialização da GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);  // Informa a versão do OpenGL a partir da qual o código funcionará
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);  // Exemplo para versão 3.3 - adaptar para a versão suportada por sua placa
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); //Essencial para computadores da Apple
+	//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	//glfwWindowHint(GLFW_SAMPLES, 4);
     
-    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Visualizador 3D - CGR", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GRAU A - Ian R. Boniatti e Eduardo Tropea", NULL, NULL);
+
     if (!window) {
         cerr << "Falha ao criar janela GLFW" << endl;
         glfwTerminate();
         return false;
     }
     
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetKeyCallback(window, key_callback);
+    glfwMakeContextCurrent(window); // Define a janela atual como contexto de renderização
+    
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // Ajusta a viewport quando a janela é redimensionada
+    glfwSetCursorPosCallback(window, mouse_callback);   // Captura a posição do mouse
+    glfwSetScrollCallback(window, scroll_callback); // Captura o scroll do mouse
+    glfwSetKeyCallback(window, key_callback);   // Captura eventos do teclado
     
     // Capturar mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -111,17 +73,23 @@ bool System::initializeGLFW() {
 }
 
 bool System::initializeOpenGL() {
+
+    // GLAD: Inicializa e carrega todos os ponteiros de funções da OpenGL
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         cerr << "Falha ao inicializar GLAD" << endl;
         return false;
     }
     
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);    // Ativa o teste de profundidade (z-buffer)
+
+    // Definindo as dimensões da viewport
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     
-    // Imprimir informações do OpenGL
+    // Imprimir informações do OpenGL e Placa de Vídeo
     cout << "Versao OpenGL: " << glGetString(GL_VERSION) << endl;
-    cout << "Versao GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+    cout << "Versao GLSL: "   << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+    cout << "Renderer: "      << glGetString(GL_RENDERER) << endl;
+    cout << "Vendor: "        << glGetString(GL_VENDOR) << endl;
 
     return true;
 }
@@ -204,12 +172,9 @@ bool System::loadShaders() {
 }
 
 bool System::loadSceneObjects() {
+    
     auto sceneObjectsInfo = readConfiguration();
-
-    //ifstream configFile("Configurador_Cena.txt"); continuar de vector<ObjectInfo> System::readConfiguration() {
-
-
-
+ 
     for (auto& sceneObject : sceneObjectsInfo) {
         auto object = make_unique<OBJ3D>(sceneObject.name);
         
@@ -265,7 +230,7 @@ void System::processInput() {
 
 void System::update() {
     updateProjeteis();
-    checkCollisions();
+    checkContinuousCollisions();
 }
 
 void System::render() {
@@ -304,8 +269,8 @@ void System::render() {
 void System::handleShooting() {
     glm::vec3 projetilPos = camera.Position + camera.Front * 0.5f;
     glm::vec3 projetilDir = camera.GetDirection();
-    
-    auto projetil = std::make_unique<Projetil>(projetilPos, projetilDir, 50.0f, 10.0f);
+
+    auto projetil = std::make_unique<Projetil>(projetilPos, projetilDir, 10.0f, 5.0f);
     projeteis.push_back(std::move(projetil));
     
     //std::cout << "Tiro disparado da posição: (" << projetilPos.x << ", " 
@@ -363,10 +328,6 @@ vector<ObjectInfo> System::readConfiguration() {
     vector<ObjectInfo> sceneObjectsInfo;  // ObjectInfo é uma estrutura para armazenar informações sobre um determinado objeto 3D
                                           // sceneObjectsInfo é um vetor que armazena várias dessas estruturas (qtd = nº de objetos da cena)
     ifstream configFile("Configurador_Cena.txt");
-    //if (!configFile.is_open()) {
-    //    cout << "Arquivo de configuração da cena não encontrado (Configurador_Cena.txt)" << endl;
-    //    return sceneObjectsInfo;
-    //}
 
     string line;
     while (getline(configFile, line)) { // loop para processar cada linha do arquivo de configuração
@@ -456,5 +417,43 @@ void System::key_callback(GLFWwindow* window, int key, int scancode, int action,
             systemInstance->keys[key] = true;
         else if (action == GLFW_RELEASE)
             systemInstance->keys[key] = false;
+    }
+}
+
+void System::checkContinuousCollisions() {
+    for (auto& projetil : projeteis) {
+        if (!projetil->isActive()) continue;
+        
+        glm::vec3 currentPos = projetil->getRayOrigin();
+        glm::vec3 direction = projetil->getRayDirection();
+        float speed = projetil->getSpeed();
+        glm::vec3 nextPos = currentPos + direction * speed * deltaTime;
+
+        // Verifica colisão com todos os objetos da cena
+        // O laço for verifica se o iterador atual ainda aponta para um elemento válido.
+        // Quando o iterador finalmente alcança a posição "past-the-end" do container,
+        // a condição se torna falsa e o loop termina, garantindo que todos os elementos
+        // válidos sejam processados sem tentar acessar memória inválida.
+        for (auto object = sceneObjects.begin(); object != sceneObjects.end();) {
+            float distance;
+            glm::vec3 hitPoint, hitNormal;
+            
+            // Usar detecção contínua de colisão
+            if ((*object)->continuousRayIntersect(currentPos, nextPos, distance, hitPoint, hitNormal)) {
+                if ((*object)->isEliminable()) {
+                    cout << "Objeto \"" << (*object)->name << "\" eliminado!" << endl;
+                    object = sceneObjects.erase(object);
+                    projetil->deactivate();
+                } else {
+                    // Usar normal precisa da face mais próxima
+                    projetil->reflect(hitNormal);
+                    cout << "Tiro refletiu em \"" << (*object)->name << "\"" << endl;
+                    ++object;
+                }
+                break;
+            } else {
+                ++object;
+            }
+        }
     }
 }

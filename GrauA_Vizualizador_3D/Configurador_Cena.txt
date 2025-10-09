@@ -5,15 +5,15 @@
 # Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ eliminável textura(path)
 
 # Objetos eliminables (alvos)
-Target1 models/cube.obj     -4.0 0.0 -2.0 0.0 0.000 0.0 1.0 1.0 1.0 1 ""
-Target2 models/pyramid.obj   4.0 0.0 -2.0 0.0 0.785 0.0 1.0 1.0 1.0 1 ""
-Target3 models/sphere.obj    0.0 2.0 -4.0 0.0 0.000 0.0 0.8 0.8 0.8 1 ""
+Target1 models/cube.obj     -4.0 0.0 -2.0 0.0 0.000 0.0 1.0 1.0 1.0 1 textures/purple.jpg
+Target2 models/pyramid.obj   4.0 0.0 -2.0 0.0 0.785 0.0 1.0 1.0 1.0 1 textures/gold.png
+Target3 models/icosaedro.obj    0.0 2.0 -4.0 0.0 0.000 0.0 0.8 0.8 0.8 1 textures/vulcan.png
 
 # Objetos não eliminables (obstáculos)
-Wall1 models/wall.obj  -5.0  0.0 -6.0 0.0 0.0 0.0  1.0 3.0  1.0 0 textures/pixelWall.png
-Wall2 models/wall.obj   5.0  0.0 -6.0 0.0 0.0 0.0  1.0 3.0  1.0 0 textures/pixelWall.png
+Wall1 models/wall.obj  -5.0  2.0 -6.0 0.0 0.0 0.0  1.0 3.0  1.0 0 textures/pixelWall.png
+Wall2 models/wall.obj   5.0  2.0 -6.0 0.0 0.0 0.0  1.0 3.0  1.0 0 textures/pixelWall.png
 Floor models/floor.obj  0.0 -1.0  0.0 0.0 0.0 0.0 10.0 0.1 10.0 0 textures/woodTexture.jpg
 
 # Obstáculos refletores
-Mirror1 models/cube.obj -1.5 1.0 -1.0 0.0 0.0 0.0 0.5 2.0 0.1 0 ""
-Mirror2 models/cube.obj  1.5 1.0 -1.0 0.0 0.0 0.0 0.5 2.0 0.1 0 ""
+Mirror1 models/cube.obj -1.5 1.0 -1.0 0.0 0.0 0.0 0.5 2.0 0.1 0 textures/red.jpg
+Mirror2 models/cube.obj  1.5 1.0 -1.0 0.0 0.0 0.0 0.5 2.0 0.1 0 textures/red.jpg

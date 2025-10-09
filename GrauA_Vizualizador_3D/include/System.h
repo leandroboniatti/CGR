@@ -4,8 +4,10 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <glad/glad.h>  // biblioteca de funções baseada nas definições/especificações OPENGL
+                        // Incluir antes de outros que requerem OpenGL (como GLFW)
+#include <GLFW/glfw3.h> // biblioteca de funções para criação da janela no Windows
+                        // e gerenciar entrada de teclado/mouse
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -32,20 +34,33 @@ struct ObjectInfo {
 
 class System {
 public:
+    GLFWwindow* window; // Janela principal do sistema OpenGL
+    OBJ3D* sceneObject; // Objeto atualmente selecionado (para manipulação)
+
     // Configurações da janela
     static const unsigned int SCREEN_WIDTH = 1024;
     static const unsigned int SCREEN_HEIGHT = 768;
-    
+
+    // Temporização
+    float deltaTime;
+    float lastFrame;    
+
     System();   // Construtor padrão
 
     ~System();  // Destrutor padrão
     
-    bool initialize();
-    void run();
+    //bool initialize();
+    bool initializeGLFW();
+    bool initializeOpenGL();
+    bool loadShaders();
+    bool loadSceneObjects();
+    void processInput();
+    void update();
+    void render();
     void shutdown();
     
 private:
-    GLFWwindow* window;
+
     Camera camera;
     Shader mainShader;
     Shader projetilShader;
@@ -53,27 +68,15 @@ private:
     std::vector<std::unique_ptr<OBJ3D>> sceneObjects;
     std::vector<std::unique_ptr<Projetil>> projeteis;
     
-    // Temporização
-    float deltaTime;
-    float lastFrame;
-    
     // Entrada
     bool keys[1024];
     bool firstMouse;
     float lastX, lastY;
     
-    bool initializeGLFW();
-    bool initializeOpenGL();
-    bool loadShaders();
-    bool loadSceneObjects();
-    
-    void processInput();
-    void update();
-    void render();
-    
     void handleShooting();
     void updateProjeteis();
     void checkCollisions();
+    void checkContinuousCollisions();
     
     // Callbacks
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
