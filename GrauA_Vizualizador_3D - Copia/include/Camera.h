@@ -52,10 +52,6 @@ public:
     // Processa o input recebido de um evento de rolagem do mouse
     void ProcessMouseScroll(float yoffset);
     
-    // Retorna a direção da câmera para disparo
-    glm::vec3 GetDirection() const { return Front; }
-    
-private:
     // Calcula o vetor front a partir dos ângulos de Euler (atualizados) da câmera
     void updateCameraVectors();
 };

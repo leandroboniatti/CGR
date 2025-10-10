@@ -21,8 +21,6 @@ public:
     // Converte face com 4 ou mais vértices em triângulos
     // usando "fan triangulation"
     std::vector<Face> triangulate() const;
-    
-    bool isTriangle() const { return vertexIndices.size() == 3; }
 };
 
 #endif

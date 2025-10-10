@@ -80,7 +80,9 @@ bool System::initializeOpenGL() {
         return false;
     }
     
-    glEnable(GL_DEPTH_TEST);    // Ativa o teste de profundidade (z-buffer)
+    // para desenhar apenas os fragmentos mais próximos da câmera
+    glEnable(GL_DEPTH_TEST);        // Ativa o teste de profundidade (z-buffer)
+    glClear(GL_DEPTH_BUFFER_BIT);   // Limpa o buffer de profundidade
 
     // Definindo as dimensões da viewport
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -237,7 +239,7 @@ void System::render() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    // Calculate matrices
+    // Calcula as matrizes de projeção e visualização
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 
                                           (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 
                                           0.1f, 100.0f);
@@ -270,8 +272,8 @@ void System::handleShooting() {
     glm::vec3 projetilPos = camera.Position + camera.Front * 0.5f;
     glm::vec3 projetilDir = camera.GetDirection();
 
-    auto projetil = std::make_unique<Projetil>(projetilPos, projetilDir, 10.0f, 5.0f);
-    projeteis.push_back(std::move(projetil));
+    auto projetil = std::make_unique<Projetil>(projetilPos, projetilDir, 10.0f, 5.0f); // cria um novo projétil
+    projeteis.push_back(std::move(projetil));   // adiciona o projétil à lista de projéteis ativos
     
     //std::cout << "Tiro disparado da posição: (" << projetilPos.x << ", " 
     //          << projetilPos.y << ", " << projetilPos.z << ")" << std::endl;
@@ -395,12 +397,12 @@ void System::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     }
     
     float xoffset = xpos - systemInstance->lastX;
-    float yoffset = systemInstance->lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = systemInstance->lastY - ypos; // coordenadas invertidas já que y-coordinates vão de baixo para cima
     
     systemInstance->lastX = xpos;
     systemInstance->lastY = ypos;
     
-    systemInstance->camera.ProcessMouseMovement(xoffset, yoffset);
+    systemInstance->camera.ProcessMouseMovement(xoffset, yoffset, true);
 }
 
 void System::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {

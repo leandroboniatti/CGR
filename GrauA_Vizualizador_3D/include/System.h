@@ -58,7 +58,7 @@ public:
     void render();
     void shutdown();
     
-private:
+//private:
 
     Camera camera;
     Shader mainShader; // shader unificado para objetos da cena e projéteis
@@ -70,11 +70,11 @@ private:
     bool keys[1024];
     bool firstMouse;
     float lastX, lastY;
-    
-    void handleShooting();
+
+    void disparo();
     void updateProjeteis();
     void checkCollisions();
-    void checkContinuousCollisions();
+    void checkCollisionsOld();
     
     // Callbacks
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);

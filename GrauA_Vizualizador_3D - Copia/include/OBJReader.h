@@ -12,7 +12,7 @@ using namespace std;
 
 class OBJReader {
 public:
-    static bool loadOBJ(const string& path,
+    static bool readFileOBJ(const string& path,
                         vector<glm::vec3>& vertices,
                         vector<glm::vec2>& texCoords,
                         vector<glm::vec3>& normals,

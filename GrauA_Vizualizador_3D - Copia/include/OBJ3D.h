@@ -30,8 +30,8 @@ public:
     OBJ3D(string& objName);
 
     ~OBJ3D();
-    
-    bool readFile(string& path);
+
+    bool loadObject(string& path);
     void render(const Shader& shader) const;
     
     void setPosition(const glm::vec3& pos);

@@ -48,8 +48,6 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    //system.setupBoundingBoxVisualization();
-
     cout << "Sistema inicializado com sucesso" << endl;
 
     cout << "Iniciando loop principal..." << endl;
@@ -67,9 +65,12 @@ int main() {
         system.deltaTime = currentFrame - system.lastFrame; // Tempo entre frames para movimentação
         system.lastFrame = currentFrame;
 
-        system.processInput();
+        system.processInput();  // Processa entrada do usuário
+                                // (teclado, mouse, etc - ver System.cpp)
 
-        system.update();
+        system.updateProjeteis();
+
+        system.checkCollisions();
 
         system.render();
 

@@ -6,7 +6,7 @@
 
 // Variáveis estáticas para controle de entrada
 static System* systemInstance = nullptr;
-static bool shootPressed = false;
+static bool tiroDisparado = false;
 
 System::System() : window(nullptr), 
                    camera(glm::vec3(0.0f, 2.0f, 10.0f)),
@@ -156,15 +156,16 @@ bool System::loadShaders() {
 // Carrega os objetos na cena
 bool System::loadSceneObjects() {
     
-    auto sceneObjectsInfo = readFileConfiguration(); // lê as configurações dos objetos da cena a partir do arquivo e 
-                                                     // as retorna em um vetor de ObjectInfo armazenando em sceneObjectsInfo
- 
+    auto sceneObjectsInfo = readFileConfiguration(); // lê as configurações dos objetos da cena, a partir do arquivo de configuração,
+                                                     // e retorna um vetor (sceneObjectsInfo) de estruturas ObjectInfo
+    //vector<ObjectInfo> sceneObjectsInfo;
+
     for (auto& sceneObject : sceneObjectsInfo) {
-        auto object = make_unique<OBJ3D>(sceneObject.name); // cria um novo objeto 3D com o nome especificado
-                                                            // no arquivo de configuração
-        
-        // Try to load the model, if it fails, continue without it
-        if (object->obj3DReadFileOBJ(sceneObject.modelPath)) {
+        auto object = make_unique<OBJ3D>(sceneObject.name); // cria um novo objeto 3D com o nome
+                                                            // especificado no arquivo de configuração
+
+        // Tenta carregar o modelo (arquivo .obj), se falhar não adiciona o objeto à cena
+        if (object->loadObject(sceneObject.modelPath)) {
             object->setPosition(sceneObject.position);
             object->setRotation(sceneObject.rotation);
             object->setScale(sceneObject.scale);
@@ -184,13 +185,6 @@ bool System::loadSceneObjects() {
         }
     }
 
-    // Configura buffers OpenGL (VBOs, VAOs) para cada grupo da malha - ver group.setupBuffers
-    
-    
-    for (auto& group : groups) { group.setupBuffers(vertices, texCoords, normals);}
-    mesh.setupBuffers();
-
-
     cout << "Cena carregada com " << sceneObjects.size() << " objetos" << endl;
     return true;
 }
@@ -202,7 +196,8 @@ vector<ObjectInfo> System::readFileConfiguration() {
 
     vector<ObjectInfo> sceneObjectsInfo;  // ObjectInfo é uma estrutura para armazenar informações sobre um determinado objeto 3D
                                           // sceneObjectsInfo é um vetor que armazena várias dessas estruturas (qtd = nº de objetos da cena)
-    ifstream configFile("Configurador_Cena.txt");
+
+    ifstream configFile("Configurador_Cena.txt");   // abre o arquivo de configuração para leitura
 
     string line;  // variável temporária para armazenar cada linha lida do arquivo de configuração
 
@@ -212,7 +207,7 @@ vector<ObjectInfo> System::readFileConfiguration() {
         // Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ eliminável
         istringstream sline(line);  // Cria um stream a partir da linha lida
         ObjectInfo objectInfo;      // instancia estrutura para armazenar informações do objeto descrito na linha processada
-        string eliminableStr;
+        //string eliminableStr;
 
         // carrega os dados da linha para o respectivo campo da estrutura
         sline >> objectInfo.name
@@ -237,11 +232,14 @@ vector<ObjectInfo> System::readFileConfiguration() {
     return sceneObjectsInfo;
 }
 
+
+// Processa a entrada do usuário
 void System::processInput() {
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     
-    // Camera movement
+    // movimentação da câmera
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
@@ -251,32 +249,37 @@ void System::processInput() {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
     
-    // Shooting
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !shootPressed) {
-        handleShooting();
-        shootPressed = true;
+    // Disparo
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !tiroDisparado) {
+        disparo();
+        tiroDisparado = true;
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) {
-        shootPressed = false;
+        tiroDisparado = false;
     }
 }
 
+
+// Atualiza o estado do sistema (movimentação de projéteis, checagem de colisões, etc)
 void System::update() {
     updateProjeteis();
-    checkContinuousCollisions();
+    checkCollisionsOld();
+    //checkCollisions();
 }
 
+
+// Renderiza a cena
 void System::render() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Calcula a matriz de projeção - glm::perspective(FOV, razão de aspecto, Near, Far) - razão de aspecto = largura/altura
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+
+    // Calcula a matriz de visualização - glm::lookAt(posição da câmera, ponto para onde a câmera está olhando, vetor up da câmera)
+    glm::mat4 view = camera.GetViewMatrix(); // glm::lookAt(Position, Position + Front, Up)
     
-    // Calcula as matrizes de projeção e visualização
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 
-                                          (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 
-                                          0.1f, 100.0f);
-    glm::mat4 view = camera.GetViewMatrix();
-    
-    // Render scene objects
+    // renderiza objetos da cena
     mainShader.use();
     mainShader.setMat4("projection", projection);
     mainShader.setMat4("view", view);
@@ -288,7 +291,7 @@ void System::render() {
         obj->render(mainShader);
     }
     
-    // Render projeteis usando o mesmo shader unificado
+    // Render projeteis
     mainShader.setBool("isProjectile", true); // agora renderizando projéteis
     mainShader.setBool("hasDiffuseMap", false); // projéteis não usam texturas
     
@@ -299,7 +302,9 @@ void System::render() {
     }
 }
 
-void System::handleShooting() {
+
+// realiza o disparo de um projétil a partir da posição e direção da câmera
+void System::disparo() {
     glm::vec3 projetilPos = camera.Position + camera.Front * 0.5f;  // posição inicial do projétil ligeiramente à frente da câmera
                                                                     // para evitar colisão imediata com a própria câmera
     glm::vec3 projetilDir = camera.Front; // Retorna a direção da câmera para disparo
@@ -308,6 +313,8 @@ void System::handleShooting() {
     projeteis.push_back(std::move(projetil));   // adiciona o projétil à lista de projéteis ativos
 }
 
+
+// Atualiza a posição dos projéteis e remove os inativos
 void System::updateProjeteis() {
     for (auto& projetil : projeteis) {
         if (projetil->isActive()) {
@@ -322,41 +329,17 @@ void System::updateProjeteis() {
                                 }), projeteis.end());
 }
 
-void System::checkCollisions() {
-    for (auto& projetil : projeteis) {
-        if (!projetil->isActive()) continue;
-        
-        for (auto it = sceneObjects.begin(); it != sceneObjects.end();) {
-            float distance;
-            if ((*it)->rayIntersect(projetil->getRayOrigin(), projetil->getRayDirection(), distance)) {
-                if ((*it)->isEliminable()) {
-                    cout << "Objeto \"" << (*it)->name << "\" eliminado!" << endl;
-                    it = sceneObjects.erase(it);
-                    projetil->deactivate();
-                } else {
-                    // Calculate reflection normal (simplified - using bounding box normal)
-                    glm::vec3 hitPoint = projetil->getRayOrigin() + projetil->getRayDirection() * distance;
-                    BoundingBox bbox = (*it)->getTransformedBoundingBox();
-                    glm::vec3 center = bbox.center();
-                    glm::vec3 normal = glm::normalize(hitPoint - center);
-                    
-                    projetil->reflect(normal);
-                    cout << "Tiro refletiu em \"" << (*it)->name << "\"!" << endl;
-                    ++it;
-                }
-                break;
-            } else {
-                ++it;
-            }
-        }
-    }
-}
 
-// Callback functions
+
+
+
+// funções de callback estáticas
 void System::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+
+// mouse_callback para movimentação da câmera
 void System::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (!systemInstance) return;
     
@@ -375,12 +358,16 @@ void System::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     systemInstance->camera.ProcessMouseMovement(xoffset, yoffset, true);
 }
 
+
+// scroll_callback para zoom da câmera
 void System::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     if (systemInstance) {
         systemInstance->camera.ProcessMouseScroll(yoffset);
     }
 }
 
+
+// key_callback para controle de teclas
 void System::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (!systemInstance) return;
     
@@ -392,39 +379,124 @@ void System::key_callback(GLFWwindow* window, int key, int scancode, int action,
     }
 }
 
-void System::checkContinuousCollisions() {
+
+// Verificação de colisões entre projéteis e objetos da cena usando detecção contínua
+void System::checkCollisions() {
+
     for (auto& projetil : projeteis) {
         if (!projetil->isActive()) continue;
         
-        glm::vec3 currentPos = projetil->getRayOrigin();
-        glm::vec3 direction = projetil->getRayDirection();
-        float speed = projetil->getSpeed();
+        glm::vec3 currentPos = projetil->position;
+        glm::vec3 direction = projetil->direction;
+        float speed = projetil->speed;
+
+        // Calcula a próxima posição do projétil com base na velocidade e no deltaTime
         glm::vec3 nextPos = currentPos + direction * speed * deltaTime;
 
         // Verifica colisão com todos os objetos da cena
-        // O laço for verifica se o iterador atual ainda aponta para um elemento válido.
-        // Quando o iterador finalmente alcança a posição "past-the-end" do container,
-        // a condição se torna falsa e o loop termina, garantindo que todos os elementos
-        // válidos sejam processados sem tentar acessar memória inválida.
-        for (auto object = sceneObjects.begin(); object != sceneObjects.end();) {
+        for (auto sceneObject = sceneObjects.begin(); sceneObject != sceneObjects.end();) {
+
             float distance;
             glm::vec3 hitPoint, hitNormal;
             
             // Usar detecção contínua de colisão
-            if ((*object)->continuousRayIntersect(currentPos, nextPos, distance, hitPoint, hitNormal)) {
-                if ((*object)->isEliminable()) {
-                    cout << "Objeto \"" << (*object)->name << "\" eliminado!" << endl;
-                    object = sceneObjects.erase(object);
-                    projetil->deactivate();
+            if ((*sceneObject)->continuousRayIntersect(currentPos, nextPos, distance, hitPoint, hitNormal)) {
+                // se houve colisão, processa o impacto
+                if ((*sceneObject)->isEliminable()) {
+                    cout << "Objeto \"" << (*sceneObject)->name << "\" eliminado!" << endl;
+                    sceneObject = sceneObjects.erase(sceneObject);
+                    projetil->desativar();
                 } else {
                     // Usar normal precisa da face mais próxima
                     projetil->reflect(hitNormal);
-                    cout << "Tiro refletiu em \"" << (*object)->name << "\"" << endl;
-                    ++object;
+                    cout << "Tiro refletiu em \"" << (*sceneObject)->name << "\"" << endl;
+                    ++sceneObject;  // continua verificando outros objetos (pode haver múltiplas colisões)
                 }
                 break;
             } else {
-                ++object;
+                ++sceneObject; // Nenhuma colisão, verifica o próximo objeto
+            }
+        }
+    }
+}
+
+
+// Verifica colisões entre projéteis e objetos da cena
+// Método antigo, baseado em interseção de raio simples (não contínuo)
+// Projétils rápidos podem atravessar objetos sem detectar colisão !!!
+/*void System::checkCollisionsOld() {
+
+    for (auto& projetil : projeteis) {
+        if (!projetil->isActive()) continue;
+
+        for (auto sceneObject = sceneObjects.begin(); sceneObject != sceneObjects.end();) { // verifica colisão com todos os objetos da cena
+            float distance;
+            if ((*sceneObject)->rayIntersect(projetil->position, projetil->direction, distance)) {
+                if ((*sceneObject)->isEliminable()) {
+                    cout << "Objeto \"" << (*sceneObject)->name << "\" eliminado!" << endl;
+                    sceneObject = sceneObjects.erase(sceneObject);
+                    projetil->desativar();
+                } else {
+                    // calcular normal de reflexão (simplificado - usando normal da caixa delimitadora)
+                    glm::vec3 hitPoint = projetil->position + projetil->direction * distance;
+                    BoundingBox bbox = (*sceneObject)->getTransformedBoundingBox();
+                    glm::vec3 center = bbox.center();
+                    glm::vec3 normal = glm::normalize(hitPoint - center);
+                    
+                    projetil->reflect(normal);
+                    cout << "Tiro refletiu em \"" << (*sceneObject)->name << "\"!" << endl;
+                    ++sceneObject;
+                }
+                break;
+            } else {
+                ++sceneObject; // Nenhuma colisão, verifica o próximo objeto
+            }
+        }
+    }
+}*/
+void System::checkCollisionsOld() {
+    const float MIN_DISTANCE = 0.1f; // Distância mínima segura antes de verificar colisões
+
+    for (auto& projetil : projeteis) {
+        if (!projetil->isActive()) continue;
+        
+        // Só verifica colisões se o projétil já percorreu distância mínima
+        if (projetil->lifetime < MIN_DISTANCE / projetil->speed) {
+            continue;
+        }
+
+        for (auto sceneObject = sceneObjects.begin(); sceneObject != sceneObjects.end();) {
+            float distance;
+            
+            // Calcular próxima posição do projétil para verificação de colisão
+            glm::vec3 nextPosition = projetil->position + projetil->direction * projetil->speed * deltaTime;
+            
+            if ((*sceneObject)->rayIntersect(projetil->position, projetil->direction, distance)) {
+                // Verificar se a colisão acontecerá no próximo frame (não imediatamente)
+                if (distance <= projetil->speed * deltaTime * 1.1f && distance > 0.0f) {
+                    if ((*sceneObject)->isEliminable()) {
+                        cout << "Objeto \"" << (*sceneObject)->name << "\" eliminado!" << endl;
+                        sceneObject = sceneObjects.erase(sceneObject);
+                        projetil->desativar();
+                    } else {
+                        // Calcular ponto de impacto mais preciso
+                        glm::vec3 hitPoint = projetil->position + projetil->direction * distance;
+                        BoundingBox bbox = (*sceneObject)->getTransformedBoundingBox();
+                        glm::vec3 center = bbox.center();
+                        glm::vec3 normal = glm::normalize(hitPoint - center);
+                        
+                        // Mover projétil para posição de colisão antes de refletir
+                        projetil->position = hitPoint + normal * 0.01f; // Pequeno offset para evitar re-colisão
+                        projetil->reflect(normal);
+                        cout << "Tiro refletiu em \"" << (*sceneObject)->name << "\"!" << endl;
+                        ++sceneObject;
+                    }
+                    break;
+                } else {
+                    ++sceneObject; // Colisão muito distante, continua verificando
+                }
+            } else {
+                ++sceneObject; // Nenhuma colisão, verifica o próximo objeto
             }
         }
     }

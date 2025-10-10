@@ -45,8 +45,8 @@ public:
     Mesh();
     ~Mesh();
     
-    bool readOBJ(string& path);
-    //void setupBuffers();
+    bool readObjectModel(string& path);
+    void setupBuffers();
     void render(const class Shader& shader) const;
     void cleanup();
     
