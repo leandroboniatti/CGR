@@ -25,8 +25,6 @@ System::System() : window(nullptr),
 System::~System() { shutdown(); }
 
 
-
-
 void System::shutdown() {
     sceneObjects.clear();
     projeteis.clear();
@@ -80,7 +78,9 @@ bool System::initializeOpenGL() {
         return false;
     }
     
-    glEnable(GL_DEPTH_TEST);    // Ativa o teste de profundidade (z-buffer)
+    // para desenhar apenas os fragmentos mais próximos da câmera
+    glEnable(GL_DEPTH_TEST);        // Ativa o teste de profundidade (z-buffer)
+    glClear(GL_DEPTH_BUFFER_BIT);   // Limpa o buffer de profundidade
 
     // Definindo as dimensões da viewport
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -95,7 +95,7 @@ bool System::initializeOpenGL() {
 }
 
 bool System::loadShaders() {
-    // Carregar shader principal do código incorporado
+    // Carregar shader unificado (serve para objetos da cena e projéteis)
     string vertexShaderSource = R"(
         #version 400 core
         layout (location = 0) in vec3 aPos;
@@ -107,10 +107,16 @@ bool System::loadShaders() {
         uniform mat4 model;
         uniform mat4 view;
         uniform mat4 projection;
+        uniform bool isProjectile; // flag para diferenciar projéteis de objetos da cena
         
         void main() {
             gl_Position = projection * view * model * vec4(aPos, 1.0);
-            TexCoord = aTexCoord;
+            // Só passa coordenadas de textura se não for projétil
+            if (!isProjectile) {
+                TexCoord = aTexCoord;
+            } else {
+                TexCoord = vec2(0.0, 0.0); // valor padrão para projéteis
+            }
         }
     )";
 
@@ -124,13 +130,18 @@ bool System::loadShaders() {
         uniform sampler2D normalMap;
         uniform bool hasDiffuseMap;
         uniform bool hasNormalMap;
+        uniform bool isProjectile; // flag para diferenciar projéteis de objetos da cena
         uniform vec3 objectColor;
         
         void main() {
             vec3 result = objectColor;
-            if (hasDiffuseMap) {
+            
+            // Se não for projétil e tem textura, usa a textura
+            if (!isProjectile && hasDiffuseMap) {
                 result = texture(diffuseMap, TexCoord).rgb;
             }
+            // Caso contrário, usa a cor sólida (para projéteis ou objetos sem textura)
+            
             FragColor = vec4(result, 1.0);
         }
     )";
@@ -139,47 +150,21 @@ bool System::loadShaders() {
         return false;
     }
     
-    // Simple projetil shader
-    string projetilVertexSource = R"(
-        #version 400 core
-        layout (location = 0) in vec3 aPos;
-        
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-        
-        void main() {
-            gl_Position = projection * view * model * vec4(aPos, 1.0);
-        }
-    )";
-    
-    string projetilFragmentSource = R"(
-        #version 400 core
-        out vec4 FragColor;
-        
-        uniform vec3 objectColor;
-        
-        void main() {
-            FragColor = vec4(objectColor, 1.0);
-        }
-    )";
-    
-    if (!projetilShader.loadFromStrings(projetilVertexSource, projetilFragmentSource)) {
-        return false;
-    }
-    
     return true;
 }
 
+// Carrega os objetos na cena
 bool System::loadSceneObjects() {
     
-    auto sceneObjectsInfo = readConfiguration();
+    auto sceneObjectsInfo = readFileConfiguration(); // lê as configurações dos objetos da cena a partir do arquivo e 
+                                                     // as retorna em um vetor de ObjectInfo armazenando em sceneObjectsInfo
  
     for (auto& sceneObject : sceneObjectsInfo) {
-        auto object = make_unique<OBJ3D>(sceneObject.name);
+        auto object = make_unique<OBJ3D>(sceneObject.name); // cria um novo objeto 3D com o nome especificado
+                                                            // no arquivo de configuração
         
         // Try to load the model, if it fails, continue without it
-        if (object->readFile(sceneObject.modelPath)) {
+        if (object->obj3DReadFileOBJ(sceneObject.modelPath)) {
             object->setPosition(sceneObject.position);
             object->setRotation(sceneObject.rotation);
             object->setScale(sceneObject.scale);
@@ -190,18 +175,66 @@ bool System::loadSceneObjects() {
                 object->setTexture(sceneObject.texturePath);
             }
 
-            sceneObjects.push_back(move(object));
+            sceneObjects.push_back(move(object));   // adiciona o objeto 3D criado à lista de objetos da cena
+
             cout << "Objeto carregado: " << sceneObject.name << endl;
         } else {
             cout << "Falha ao carregar objeto: " << sceneObject.name
                  << " de " << sceneObject.modelPath << endl;
         }
     }
+
+    // Configura buffers OpenGL (VBOs, VAOs) para cada grupo da malha - ver group.setupBuffers
     
-    positionObjectsInScene();
+    
+    for (auto& group : groups) { group.setupBuffers(vertices, texCoords, normals);}
+    mesh.setupBuffers();
+
 
     cout << "Cena carregada com " << sceneObjects.size() << " objetos" << endl;
     return true;
+}
+
+// Carrega as informações/configurações dos objetos da cena
+// (Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ Eliminável(S/N) TexturePath)
+// a partir do arquivo de configuração da cena - "Configurador_Cena.txt"
+vector<ObjectInfo> System::readFileConfiguration() {
+
+    vector<ObjectInfo> sceneObjectsInfo;  // ObjectInfo é uma estrutura para armazenar informações sobre um determinado objeto 3D
+                                          // sceneObjectsInfo é um vetor que armazena várias dessas estruturas (qtd = nº de objetos da cena)
+    ifstream configFile("Configurador_Cena.txt");
+
+    string line;  // variável temporária para armazenar cada linha lida do arquivo de configuração
+
+    while (getline(configFile, line)) { // loop para processar cada linha do arquivo de configuração
+        if (line.empty() || line[0] == '#') continue; // Ignora linhas vazias ou comentários
+
+        // Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ eliminável
+        istringstream sline(line);  // Cria um stream a partir da linha lida
+        ObjectInfo objectInfo;      // instancia estrutura para armazenar informações do objeto descrito na linha processada
+        string eliminableStr;
+
+        // carrega os dados da linha para o respectivo campo da estrutura
+        sline >> objectInfo.name
+              >> objectInfo.modelPath
+              >> objectInfo.position.x
+              >> objectInfo.position.y
+              >> objectInfo.position.z
+              >> objectInfo.rotation.x
+              >> objectInfo.rotation.y
+              >> objectInfo.rotation.z
+              >> objectInfo.scale.x
+              >> objectInfo.scale.y
+              >> objectInfo.scale.z
+              >> objectInfo.eliminable
+              >> objectInfo.texturePath;
+
+        sceneObjectsInfo.push_back(objectInfo); // adiciona a estrutura preenchida ao vetor de configurações
+    }
+    
+    configFile.close();
+    //cout << "Carregadas " << configs.size() << " configurações de objetos" << endl;
+    return sceneObjectsInfo;
 }
 
 void System::processInput() {
@@ -237,7 +270,7 @@ void System::render() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    // Calculate matrices
+    // Calcula as matrizes de projeção e visualização
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 
                                           (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 
                                           0.1f, 100.0f);
@@ -248,33 +281,31 @@ void System::render() {
     mainShader.setMat4("projection", projection);
     mainShader.setMat4("view", view);
     //mainShader.setVec3("viewPos", camera.Position);
+    mainShader.setBool("isProjectile", false); // objetos da cena não são projéteis
     mainShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
     
     for (const auto& obj : sceneObjects) { // renderiza cada objeto da cena
         obj->render(mainShader);
     }
     
-    // Render projeteis
-    projetilShader.use();
-    projetilShader.setMat4("projection", projection);
-    projetilShader.setMat4("view", view);
+    // Render projeteis usando o mesmo shader unificado
+    mainShader.setBool("isProjectile", true); // agora renderizando projéteis
+    mainShader.setBool("hasDiffuseMap", false); // projéteis não usam texturas
     
     for (const auto& projetil : projeteis) {
         if (projetil->isActive()) {
-            projetil->draw(projetilShader);
+            projetil->draw(mainShader);
         }
     }
 }
 
 void System::handleShooting() {
-    glm::vec3 projetilPos = camera.Position + camera.Front * 0.5f;
-    glm::vec3 projetilDir = camera.GetDirection();
+    glm::vec3 projetilPos = camera.Position + camera.Front * 0.5f;  // posição inicial do projétil ligeiramente à frente da câmera
+                                                                    // para evitar colisão imediata com a própria câmera
+    glm::vec3 projetilDir = camera.Front; // Retorna a direção da câmera para disparo
 
-    auto projetil = std::make_unique<Projetil>(projetilPos, projetilDir, 10.0f, 5.0f);
-    projeteis.push_back(std::move(projetil));
-    
-    //std::cout << "Tiro disparado da posição: (" << projetilPos.x << ", " 
-    //          << projetilPos.y << ", " << projetilPos.z << ")" << std::endl;
+    auto projetil = std::make_unique<Projetil>(projetilPos, projetilDir, 10.0f, 5.0f); // cria um novo projétil
+    projeteis.push_back(std::move(projetil));   // adiciona o projétil à lista de projéteis ativos
 }
 
 void System::updateProjeteis() {
@@ -321,65 +352,6 @@ void System::checkCollisions() {
     }
 }
 
-// Carrega as informações/configurações dos objetos da cena
-// (Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ Eliminável(S/N))
-// a partir do arquivo de configuração da cena - "Configurador_Cena.txt"
-vector<ObjectInfo> System::readConfiguration() {
-    vector<ObjectInfo> sceneObjectsInfo;  // ObjectInfo é uma estrutura para armazenar informações sobre um determinado objeto 3D
-                                          // sceneObjectsInfo é um vetor que armazena várias dessas estruturas (qtd = nº de objetos da cena)
-    ifstream configFile("Configurador_Cena.txt");
-
-    string line;
-    while (getline(configFile, line)) { // loop para processar cada linha do arquivo de configuração
-        if (line.empty() || line[0] == '#') continue; // Ignora linhas vazias ou comentários
-
-        // Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ eliminável
-        istringstream sline(line);  // Cria um stream a partir da linha lida
-        ObjectInfo objectInfo;      // instancia estrutura para armazenar informações do objeto descrito na linha processada
-        string eliminableStr;
-
-        // carrega os dados da linha para o respectivo campo da estrutura
-        sline >> objectInfo.name
-              >> objectInfo.modelPath
-              >> objectInfo.position.x
-              >> objectInfo.position.y
-              >> objectInfo.position.z
-              >> objectInfo.rotation.x
-              >> objectInfo.rotation.y
-              >> objectInfo.rotation.z
-              >> objectInfo.scale.x
-              >> objectInfo.scale.y
-              >> objectInfo.scale.z
-              >> objectInfo.eliminable
-              >> objectInfo.texturePath;
-
-        sceneObjectsInfo.push_back(objectInfo); // adiciona a estrutura preenchida ao vetor de configurações
-    }
-    
-    configFile.close();
-    //cout << "Carregadas " << configs.size() << " configurações de objetos" << endl;
-    return sceneObjectsInfo;
-}
-
-void System::positionObjectsInScene() {
-    // Ensure objects don't overlap by adjusting positions if needed
-    for (size_t i = 0; i < sceneObjects.size(); i++) {
-        for (size_t j = i + 1; j < sceneObjects.size(); j++) {
-            auto& obj1 = sceneObjects[i];
-            auto& obj2 = sceneObjects[j];
-            
-            glm::vec3 dist = obj1->getPosition() - obj2->getPosition();
-            float distance = glm::length(dist);
-            
-            if (distance < 2.0f) { // Minimum distance between objects
-                glm::vec3 offset = glm::normalize(dist) * (2.0f - distance) * 0.5f;
-                obj1->translate(offset);
-                obj2->translate(-offset);
-            }
-        }
-    }
-}
-
 // Callback functions
 void System::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -395,12 +367,12 @@ void System::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     }
     
     float xoffset = xpos - systemInstance->lastX;
-    float yoffset = systemInstance->lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = systemInstance->lastY - ypos; // coordenadas invertidas já que y-coordinates vão de baixo para cima
     
     systemInstance->lastX = xpos;
     systemInstance->lastY = ypos;
     
-    systemInstance->camera.ProcessMouseMovement(xoffset, yoffset);
+    systemInstance->camera.ProcessMouseMovement(xoffset, yoffset, true);
 }
 
 void System::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {

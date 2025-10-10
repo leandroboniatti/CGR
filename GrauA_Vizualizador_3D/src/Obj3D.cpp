@@ -25,9 +25,9 @@ OBJ3D::OBJ3D(string& objName)
 
 OBJ3D::~OBJ3D() { mesh.cleanup(); }
 
-bool OBJ3D::readFile(string& path) {
+bool OBJ3D::obj3DReadFileOBJ(string& path) {
 
-    if (!mesh.readOBJ(path)) {
+    if (!mesh.meshReadFileOBJ(path)) {
         cerr << "Falha ao carregar arquivo OBJ: " << path << endl;
         return false;
     }

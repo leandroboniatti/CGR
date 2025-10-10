@@ -49,7 +49,6 @@ public:
 
     ~System();  // Destrutor padrão
     
-    //bool initialize();
     bool initializeGLFW();
     bool initializeOpenGL();
     bool loadShaders();
@@ -62,8 +61,7 @@ public:
 private:
 
     Camera camera;
-    Shader mainShader;
-    Shader projetilShader;
+    Shader mainShader; // shader unificado para objetos da cena e projéteis
     
     std::vector<std::unique_ptr<OBJ3D>> sceneObjects;
     std::vector<std::unique_ptr<Projetil>> projeteis;
@@ -85,8 +83,7 @@ private:
     static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
     
     // Funções auxiliares
-    vector<ObjectInfo> readConfiguration();
-    void positionObjectsInScene();
+    vector<ObjectInfo> readFileConfiguration();
 };
 
 #endif

@@ -9,7 +9,7 @@
 // Na classe Mesh é que são definidos os vetores de armazenamento
 // de vértices, coordenadas de textura, normais e grupos
 // que são passados como referência para este método
-bool OBJReader::loadOBJ(const string& path,
+bool OBJReader::readFileOBJ(const string& path,
                         vector<glm::vec3>& vertices,
                         vector<glm::vec2>& texCoords,
                         vector<glm::vec3>& normals,
@@ -89,86 +89,9 @@ bool OBJReader::loadOBJ(const string& path,
     
     file.close();
 
-    // Atribuir materiais aos grupos, caso tenham sido definidos e o material exista no mapa
-    //for (auto& group : groups) {    // para cada grupo presente no vetor de grupos
-    //    if (!group.materialName.empty() && materials.find(group.materialName) != materials.end()) {
-    //        group.material = materials[group.materialName];
-    //        group.material.loadTextures();
-    //    }
-    //}
-
-    //std::cout << "Arquivo OBJ carregado: " << path << std::endl;
-    //std::cout << "nº de Vertices: " << vertices.size() << ", nº de TexCoords: " << texCoords.size()
-    //          << ", nº de Normais: " << normals.size() << ", nº de Grupos: " << groups.size() << std::endl;
-
     return true;
 }
-/*
-bool OBJReader::loadMTL(const string& path, map<string, Material>& materials) {
-    ifstream file(path);
-    if (!file.is_open()) {
-        cerr << "Failed to open MTL file: " << path << endl;
-        return false;
-    }
 
-    string line;
-    Material* currentMaterial = nullptr;
-    string mtlDirectory = getDirectory(path);
-
-    while (getline(file, line)) {
-        line = trim(line);
-        
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-        
-        std::istringstream iss(line);
-        std::string prefix;
-        iss >> prefix;
-        
-        if (prefix == "newmtl") {
-            std::string materialName;
-            iss >> materialName;
-            materials[materialName] = Material(materialName);
-            currentMaterial = &materials[materialName];
-        }
-        else if (currentMaterial) {
-            if (prefix == "Ka") {
-                iss >> currentMaterial->ambient.x >> currentMaterial->ambient.y >> currentMaterial->ambient.z;
-            }
-            else if (prefix == "Kd") {
-                iss >> currentMaterial->diffuse.x >> currentMaterial->diffuse.y >> currentMaterial->diffuse.z;
-            }
-            else if (prefix == "Ks") {
-                iss >> currentMaterial->specular.x >> currentMaterial->specular.y >> currentMaterial->specular.z;
-            }
-            else if (prefix == "Ns") {
-                iss >> currentMaterial->shininess;
-            }
-            else if (prefix == "map_Kd") {
-                std::string texturePath;
-                iss >> texturePath;
-                currentMaterial->diffuseTexture = mtlDirectory + "/" + texturePath;
-            }
-            else if (prefix == "map_Ks") {
-                std::string texturePath;
-                iss >> texturePath;
-                currentMaterial->specularTexture = mtlDirectory + "/" + texturePath;
-            }
-            else if (prefix == "map_Bump" || prefix == "bump") {
-                std::string texturePath;
-                iss >> texturePath;
-                currentMaterial->normalTexture = mtlDirectory + "/" + texturePath;
-            }
-        }
-    }
-    
-    file.close();
-    std::cout << "MTL loaded: " << path << " (" << materials.size() << " materials)" << std::endl;
-    
-    return true;
-}
-*/
 
 void OBJReader::parseFace(const string& faceStr, Face& face) {
     istringstream iss(faceStr); // Cria um stream de string para processar a linha

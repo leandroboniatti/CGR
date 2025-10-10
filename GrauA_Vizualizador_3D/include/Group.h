@@ -11,9 +11,7 @@ using namespace std;
 class Group {
 public:
     string name;
-    //string materialName;
     vector<Face> faces;
-    //Material material;
     
     // OpenGL objects
     unsigned int VAO;

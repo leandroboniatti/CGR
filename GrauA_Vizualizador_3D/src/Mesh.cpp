@@ -11,10 +11,8 @@ Mesh::~Mesh() {
     cleanup();
 }
 
-bool Mesh::readOBJ(string& path) {
-    //cleanup();
-
-    // Carrega dados do OBJ chamando loadOBJ, método estático da classe OBJReader.
+bool Mesh::meshReadFileOBJ(string& path) {
+    // Carrega dados do OBJ chamando OBJReader::readFileOBJ, método da classe OBJReader.
     // Este, por sua vez, preenche os vetores e mapas passados por referência.
     // path - caminho do arquivo, recebido como parâmetro
     // vertices - vetor com os vértices do modelo, no formato VEC3, definido na classe Mesh
@@ -22,29 +20,26 @@ bool Mesh::readOBJ(string& path) {
     // normals - vetor com as normais de cada face no formato VEC3, definido na classe Mesh
     // groups - grupo de grupos - vetor com os grupos, definido na classe Mesh
     // map<string, Material> emptyMaterials; // Mapa vazio, não usaremos materiais
-    if (!OBJReader::loadOBJ(path, vertices, texCoords, normals, groups)) {
+    if (!OBJReader::readFileOBJ(path, vertices, texCoords, normals, groups)) {
         return false;
     }
     
     // Gerar normais se não existirem
     //if (normals.empty()) { calculateNormals(); }
     
-    // Calcula a bounding box da malha
+    // Calcula a bounding box do modelo/objeto
     calculateBoundingBox();
 
-    // Configura buffers OpenGL (VBOs, VAOs) para cada grupo da malha
-    for (auto& group : groups) { group.setupBuffers(vertices, texCoords, normals);}
-    //setupBuffers();
     
     return true;
 }
 
 // Configura buffers OpenGL (VBOs, VAOs) para cada grupo da malha
-//void Mesh::setupBuffers() {
-//    for (auto& group : groups) { group.setupBuffers(vertices, texCoords, normals);}
-//    
-//    cout << "Mesh buffers setup complete" << endl;
-//}
+void Mesh::setupBuffers() {
+    for (auto& group : groups) { group.setupBuffers(vertices, texCoords, normals);}
+    
+    cout << "Mesh buffers setup complete" << endl;
+}
 
 void Mesh::render(const Shader& shader) const {
     for (const auto& group : groups) {
