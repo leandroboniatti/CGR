@@ -82,7 +82,8 @@ bool OBJReader::readFileOBJ(const string& path,
     return true;
 }
 
-
+// Analisa uma linha do arquivo OBJ e preenche os indices da face
+// nos vetores de índices da face (vertexIndices, textureIndices, normalIndices)
 void OBJReader::parseFace(const string& faceStr, Face& face) {
     
     istringstream sline(faceStr); // Cria um stream de string para processar a linha

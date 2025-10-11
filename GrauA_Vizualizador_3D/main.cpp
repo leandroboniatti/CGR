@@ -50,11 +50,10 @@ int main() {
 
     cout << "Sistema inicializado com sucesso" << endl;
 
-    cout << "Iniciando loop principal..." << endl;
-
     cout << "Controles:" << endl;
     cout << "  WASD/Setas: Mover camera" << endl;
     cout << "  Mouse: Olhar ao redor" << endl;
+    cout << "  Scroll: Zoom" << endl;
     cout << "  ESPAÇO: Atirar" << endl;
     cout << "  ESC: Sair" << endl;
 
@@ -68,15 +67,15 @@ int main() {
         system.processInput();  // Processa entrada do usuário
                                 // (teclado, mouse, etc - ver System.cpp)
 
-        system.updateProjeteis();
+        system.updateProjeteis();   // Atualiza posição dos projéteis (ver System.cpp)
 
-        system.checkCollisions();
+        system.checkCollisions();   // Verifica colisões entre projéteis e objetos da cena (ver System.cpp)
 
-        system.render();
+        system.render();        // Renderiza a cena (ver System.cpp)
 
-        glfwSwapBuffers(system.window);
+        glfwSwapBuffers(system.window); // Troca os buffers da janela (ver System.cpp)
 
-        glfwPollEvents();
+        glfwPollEvents();   // Processa eventos da janela (teclado, mouse, etc) (ver System.cpp)
     }
 
     system.shutdown(); // Limpa e finaliza o sistema

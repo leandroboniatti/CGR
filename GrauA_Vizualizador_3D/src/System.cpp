@@ -22,6 +22,7 @@ System::System() : window(nullptr),
     for (int i = 0; i < 1024; i++) { keys[i] = false; }
 }
 
+
 System::~System() { shutdown(); }
 
 
@@ -38,6 +39,8 @@ void System::shutdown() {
     cout << "Desligamento do sistema concluido" << endl;
 }
 
+
+// Inicializa a GLFW (janela, contexto, callbacks)
 bool System::initializeGLFW() {
 
     // GLFW: Inicialização e configurações de versão do OpenGL
@@ -70,6 +73,8 @@ bool System::initializeGLFW() {
     return true;
 }
 
+
+// Inicializa OpenGL (GLAD, Viewport, Depth Test)
 bool System::initializeOpenGL() {
 
     // GLAD: Inicializa e carrega todos os ponteiros de funções da OpenGL
@@ -94,15 +99,17 @@ bool System::initializeOpenGL() {
     return true;
 }
 
+
+// Carrega os shaders
 bool System::loadShaders() {
-    // Carregar shader unificado (serve para objetos da cena e projéteis)
+    // Código fonte do Vertex Shader (em GLSL - Graphics Library Shading Language)
     string vertexShaderSource = R"(
         #version 400 core
-        layout (location = 0) in vec3 aPos;
-        layout (location = 1) in vec2 aTexCoord;
-        layout (location = 2) in vec3 aNormal;
+        layout (location = 0) in vec3 coordenadasDaGeometria;
+        layout (location = 1) in vec2 coordenadasDaTextura;
+        layout (location = 2) in vec3 coordenadasDaNormal;
         
-        out vec2 TexCoord;
+        out vec2 textureCoord;
         
         uniform mat4 model;
         uniform mat4 view;
@@ -110,21 +117,31 @@ bool System::loadShaders() {
         uniform bool isProjectile; // flag para diferenciar projéteis de objetos da cena
         
         void main() {
-            gl_Position = projection * view * model * vec4(aPos, 1.0);
+            gl_Position = projection * view * model * vec4(coordenadasDaGeometria, 1.0);
             // Só passa coordenadas de textura se não for projétil
             if (!isProjectile) {
-                TexCoord = aTexCoord;
+                textureCoord = coordenadasDaTextura;
             } else {
-                TexCoord = vec2(0.0, 0.0); // valor padrão para projéteis
-            }
+                textureCoord = vec2(0.0, 0.0); // valor padrão para projéteis
+            } 
         }
     )";
+   		// "coordenadasDaGeometria" recebe as informações que estão no local 0 -> definidas em glVertexAttribPointer(0, xxxxxxxx);
+		// "coordenadasDaTextura"   recebe as informações que estão no local 1 -> definidas em glVertexAttribPointer(1, xxxxxxxx);
+        // "coordenadasDaNormal"    recebe as informações que estão no local 2 -> definidas em glVertexAttribPointer(2, xxxxxxxx);
+		// "model" receberá as informações das transformações a serem aplicadas (translação, escala, rotação)
+        // "view" receberá as informações da câmera (posição, direção, etc.)
+        // "projection" receberá as informações da forma de projeção escolhida
+		// "textureCoord" enviará ao pipeline a textura de uma posição específica
+		// "gl_Position" é uma variável específica do GLSL que recebe a posição final do vertice processado
 
+
+	//Código fonte do Fragment Shader (em GLSL - Graphics Library Shading Language)
     string fragmentShaderSource = R"(
         #version 400 core
         out vec4 FragColor;
         
-        in vec2 TexCoord;
+        in vec2 textureCoord;
         
         uniform sampler2D diffuseMap;
         uniform sampler2D normalMap;
@@ -138,7 +155,7 @@ bool System::loadShaders() {
             
             // Se não for projétil e tem textura, usa a textura
             if (!isProjectile && hasDiffuseMap) {
-                result = texture(diffuseMap, TexCoord).rgb;
+                result = texture(diffuseMap, textureCoord).rgb;
             }
             // Caso contrário, usa a cor sólida (para projéteis ou objetos sem textura)
             
@@ -146,6 +163,7 @@ bool System::loadShaders() {
         }
     )";
     
+    // Compila e linka os shaders
     if (!mainShader.loadFromStrings(vertexShaderSource, fragmentShaderSource)) {
         return false;
     }
@@ -153,14 +171,14 @@ bool System::loadShaders() {
     return true;
 }
 
+
 // Carrega os objetos na cena
 bool System::loadSceneObjects() {
-    
+                                                     // na apresentação: ver readFileConfiguration() logo abaixo
     auto sceneObjectsInfo = readFileConfiguration(); // lê as configurações dos objetos da cena, a partir do arquivo de configuração,
                                                      // e retorna um vetor (sceneObjectsInfo) de estruturas ObjectInfo
-    //vector<ObjectInfo> sceneObjectsInfo;
 
-    for (auto& sceneObject : sceneObjectsInfo) {
+    for (auto& sceneObject : sceneObjectsInfo) { // loop para processar cada configuração de objeto lida do arquivo
         auto object = make_unique<OBJ3D>(sceneObject.name); // cria um novo objeto 3D com o nome
                                                             // especificado no arquivo de configuração
 
@@ -179,19 +197,19 @@ bool System::loadSceneObjects() {
             sceneObjects.push_back(move(object));   // adiciona o objeto 3D criado à lista de objetos da cena
 
             cout << "Objeto carregado: " << sceneObject.name << endl;
-        } else {
+        }
+        else {
             cout << "Falha ao carregar objeto: " << sceneObject.name
                  << " de " << sceneObject.modelPath << endl;
         }
     }
 
-    cout << "Cena carregada com " << sceneObjects.size() << " objetos" << endl;
     return true;
 }
 
-// Carrega as informações/configurações dos objetos da cena
+
+// Carrega as informações/configurações dos objetos da cena a partir do arquivo de configuração da cena - "Configurador_Cena.txt"
 // (Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ Eliminável(S/N) TexturePath)
-// a partir do arquivo de configuração da cena - "Configurador_Cena.txt"
 vector<ObjectInfo> System::readFileConfiguration() {
 
     vector<ObjectInfo> sceneObjectsInfo;  // ObjectInfo é uma estrutura para armazenar informações sobre um determinado objeto 3D
@@ -205,11 +223,11 @@ vector<ObjectInfo> System::readFileConfiguration() {
         if (line.empty() || line[0] == '#') continue; // Ignora linhas vazias ou comentários
 
         // Nome Path posX posY posZ rotX rotY rotZ scaleX scaleY scaleZ eliminável
-        istringstream sline(line);  // Cria um stream a partir da linha lida
+        istringstream sline(line);  // Cria um stream (sline) a partir da linha lida
         ObjectInfo objectInfo;      // instancia estrutura para armazenar informações do objeto descrito na linha processada
         //string eliminableStr;
 
-        // carrega os dados da linha para o respectivo campo da estrutura
+        // carrega os dados da linha para o respectivo campo da estrutura objectInfo
         sline >> objectInfo.name
               >> objectInfo.modelPath
               >> objectInfo.position.x
@@ -225,10 +243,10 @@ vector<ObjectInfo> System::readFileConfiguration() {
               >> objectInfo.texturePath;
 
         sceneObjectsInfo.push_back(objectInfo); // adiciona a estrutura preenchida ao vetor de configurações
-    }
+    }                                           // vetor de estruturas ObjectInfo
     
     configFile.close();
-    //cout << "Carregadas " << configs.size() << " configurações de objetos" << endl;
+
     return sceneObjectsInfo;
 }
 
@@ -257,14 +275,6 @@ void System::processInput() {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) {
         tiroDisparado = false;
     }
-}
-
-
-// Atualiza o estado do sistema (movimentação de projéteis, checagem de colisões, etc)
-void System::update() {
-    updateProjeteis();
-    checkCollisionsOld();
-    //checkCollisions();
 }
 
 
@@ -330,9 +340,6 @@ void System::updateProjeteis() {
 }
 
 
-
-
-
 // funções de callback estáticas
 void System::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -380,81 +387,8 @@ void System::key_callback(GLFWwindow* window, int key, int scancode, int action,
 }
 
 
-// Verificação de colisões entre projéteis e objetos da cena usando detecção contínua
+// Verifica colisões entre projéteis e objetos da cena - tem problema na reflexão!
 void System::checkCollisions() {
-
-    for (auto& projetil : projeteis) {
-        if (!projetil->isActive()) continue;
-        
-        glm::vec3 currentPos = projetil->position;
-        glm::vec3 direction = projetil->direction;
-        float speed = projetil->speed;
-
-        // Calcula a próxima posição do projétil com base na velocidade e no deltaTime
-        glm::vec3 nextPos = currentPos + direction * speed * deltaTime;
-
-        // Verifica colisão com todos os objetos da cena
-        for (auto sceneObject = sceneObjects.begin(); sceneObject != sceneObjects.end();) {
-
-            float distance;
-            glm::vec3 hitPoint, hitNormal;
-            
-            // Usar detecção contínua de colisão
-            if ((*sceneObject)->continuousRayIntersect(currentPos, nextPos, distance, hitPoint, hitNormal)) {
-                // se houve colisão, processa o impacto
-                if ((*sceneObject)->isEliminable()) {
-                    cout << "Objeto \"" << (*sceneObject)->name << "\" eliminado!" << endl;
-                    sceneObject = sceneObjects.erase(sceneObject);
-                    projetil->desativar();
-                } else {
-                    // Usar normal precisa da face mais próxima
-                    projetil->reflect(hitNormal);
-                    cout << "Tiro refletiu em \"" << (*sceneObject)->name << "\"" << endl;
-                    ++sceneObject;  // continua verificando outros objetos (pode haver múltiplas colisões)
-                }
-                break;
-            } else {
-                ++sceneObject; // Nenhuma colisão, verifica o próximo objeto
-            }
-        }
-    }
-}
-
-
-// Verifica colisões entre projéteis e objetos da cena
-// Método antigo, baseado em interseção de raio simples (não contínuo)
-// Projétils rápidos podem atravessar objetos sem detectar colisão !!!
-/*void System::checkCollisionsOld() {
-
-    for (auto& projetil : projeteis) {
-        if (!projetil->isActive()) continue;
-
-        for (auto sceneObject = sceneObjects.begin(); sceneObject != sceneObjects.end();) { // verifica colisão com todos os objetos da cena
-            float distance;
-            if ((*sceneObject)->rayIntersect(projetil->position, projetil->direction, distance)) {
-                if ((*sceneObject)->isEliminable()) {
-                    cout << "Objeto \"" << (*sceneObject)->name << "\" eliminado!" << endl;
-                    sceneObject = sceneObjects.erase(sceneObject);
-                    projetil->desativar();
-                } else {
-                    // calcular normal de reflexão (simplificado - usando normal da caixa delimitadora)
-                    glm::vec3 hitPoint = projetil->position + projetil->direction * distance;
-                    BoundingBox bbox = (*sceneObject)->getTransformedBoundingBox();
-                    glm::vec3 center = bbox.center();
-                    glm::vec3 normal = glm::normalize(hitPoint - center);
-                    
-                    projetil->reflect(normal);
-                    cout << "Tiro refletiu em \"" << (*sceneObject)->name << "\"!" << endl;
-                    ++sceneObject;
-                }
-                break;
-            } else {
-                ++sceneObject; // Nenhuma colisão, verifica o próximo objeto
-            }
-        }
-    }
-}*/
-void System::checkCollisionsOld() {
     const float MIN_DISTANCE = 0.1f; // Distância mínima segura antes de verificar colisões
 
     for (auto& projetil : projeteis) {

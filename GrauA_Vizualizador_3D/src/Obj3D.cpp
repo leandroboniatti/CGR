@@ -104,20 +104,28 @@ void OBJ3D::scaleBy(const glm::vec3& factor) {
     updateTransform();
 }
 
+
+// Atualiza a matriz de transformação (model matrix) com base na posição, rotação e escala
 void OBJ3D::updateTransform() {
+
     transform = glm::mat4(1.0f);
-    
-    // Apply transformations in order: Scale -> Rotate -> Translate
+
+    // Aplica transformações na ordem: Escala -> Rotação -> Translação
+
+    // translação
     transform = glm::translate(transform, position);
     
-    // Apply rotations (Euler angles)
+    // Aplica rotações
     transform = glm::rotate(transform, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
     transform = glm::rotate(transform, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
     transform = glm::rotate(transform, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
     
+    // Aplica escala
     transform = glm::scale(transform, scale);
 }
 
+
+// Retorna a bounding box do objeto 3D transformada pela matriz de transformação
 BoundingBox OBJ3D::getTransformedBoundingBox() const {
     BoundingBox transformedBB;
 
@@ -153,34 +161,4 @@ bool OBJ3D::rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirecti
     
     // verifica interseção com a bounding box da malha no espaço do objeto
     return mesh.rayIntersect(glm::vec3(localOrigin), glm::normalize(glm::vec3(localDirection)), distance);
-}
-
-
-// Testa a interseção de um segmento de reta com a malha do objeto. O segmento é
-// definido por dois pontos: início (segStart) e fim (segEnd). "segStart" é o ponto atual
-// do projétil e "segEnd" é o ponto futuro do projétil. Se houver interseção, retorna o
-// ponto de interseção mais próximo (hitPoint), a distância dele ao ponto de origem do
-// segmento (segStart) e a normal da face atingida (hitNormal), para eventual reflexão.
-bool OBJ3D::continuousRayIntersect(const glm::vec3& segStart, const glm::vec3& segEnd,
-                                  float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const {
-    // Transforma as informações do "raio" para o espaço do objeto ("Local Space")
-    glm::mat4 invTransform = glm::inverse(transform);   // gera a matriz inversa da transformação
-    glm::vec4 localStart = invTransform * glm::vec4(segStart, 1.0f);  // ponto inicial do segmento no espaço do objeto
-    glm::vec4 localEnd = invTransform * glm::vec4(segEnd, 1.0f);       // ponto final do segmento no espaço do objeto
-
-    glm::vec3 localHitPoint, localHitNormal;
-    
-    if (mesh.continuousRayIntersect(glm::vec3(localStart), glm::vec3(localEnd), 
-                                   distance, localHitPoint, localHitNormal)) {
-        // Transforma o hitPoint e a normal de volta para o "World Space"
-        glm::vec4 worldHitPoint = transform * glm::vec4(localHitPoint, 1.0f);
-        glm::vec4 worldHitNormal = glm::transpose(invTransform) * glm::vec4(localHitNormal, 0.0f);
-        
-        hitPoint = glm::vec3(worldHitPoint);
-        hitNormal = glm::normalize(glm::vec3(worldHitNormal));
-        
-        return true;
-    }
-    
-    return false;
 }

@@ -3,15 +3,12 @@
 #include <stb_image.h>
 
 unsigned int Texture::loadTexture(const string& path) {
-    return loadFromFile(path.c_str());
-}
-
-unsigned int Texture::loadFromFile(const char* path) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
     
     int width, height, nrComponents;
-    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
     
     if (data) {
         GLenum format = GL_RGB; // Formato padrão

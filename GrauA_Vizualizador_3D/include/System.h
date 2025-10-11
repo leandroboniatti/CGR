@@ -54,14 +54,11 @@ public:
     bool loadShaders();
     bool loadSceneObjects();
     void processInput();
-    void update();
     void render();
     void shutdown();
     
-//private:
-
-    Camera camera;
-    Shader mainShader; // shader unificado para objetos da cena e projéteis
+    Camera camera;      // câmera do sistema
+    Shader mainShader;  // shader unificado para objetos da cena e projéteis
     
     std::vector<std::unique_ptr<OBJ3D>> sceneObjects;
     std::vector<std::unique_ptr<Projetil>> projeteis;
@@ -74,7 +71,6 @@ public:
     void disparo();
     void updateProjeteis();
     void checkCollisions();
-    void checkCollisionsOld();
     
     // Callbacks
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);

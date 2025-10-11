@@ -19,18 +19,12 @@ struct BoundingBox {
         min = glm::min(min, point);
         max = glm::max(max, point);
     }
-    
-    glm::vec3 center() const {
-        return (min + max) * 0.5f;
-    }
-    
-    glm::vec3 size() const {
-        return max - min;
-    }
-    
-    float radius() const {
-        return glm::length(size()) * 0.5f;
-    }
+
+    glm::vec3 center() const { return (min + max) * 0.5f; }
+
+    glm::vec3 size() const { return max - min; }
+
+    float radius() const { return glm::length(size()) * 0.5f; }
 };
 
 
@@ -43,8 +37,10 @@ public:
     
     BoundingBox boundingBox;    // estrutura da bounding box do objeto 3D
     
+    // Construtor
     Mesh();
 
+    // Destrutor
     ~Mesh();
     
     // Carrega dados do OBJ chamando OBJReader::readFileOBJ, método da classe OBJReader.
@@ -67,27 +63,7 @@ public:
     bool rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
                      float& distance) const;
 
-
-    // Testa interseção precisa do segmento com a malha (retorna true se houver interseção)
-    // Se houver interseção, retorna a distância até o ponto de interseção mais próximo
-    // a partir da origem do segmento (rayOrigin), o ponto de interseção (hitPoint) e a normal da face atingida (hitNormal)
-    bool rayIntersectPrecise(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
-                             float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const;
-
-
-    // Testa a interseção contínua de um segmento de reta com a malha do objeto. O segmento é
-    // definido por dois pontos: início (rayStart) e fim (rayEnd). "rayStart" é o ponto atual
-    // do projétil e "rayEnd" é o ponto futuro do projétil. Se houver interseção, retorna o
-    // ponto de interseção mais próximo (hitPoint), a distância dele ao ponto de origem do
-    // segmento (rayStart) e a normal da face atingida (hitNormal), para eventual reflexão.
-    bool continuousRayIntersect(const glm::vec3& rayStart, const glm::vec3& rayEnd,
-                                float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const;
-
-    void calculateNormals();
-
-    bool rayTriangleIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,
-                             const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
-                             float& distance, glm::vec3& hitPoint) const;
+    // Calcula a normal de uma face dada pelos três vértices (v0, v1, v2)
     glm::vec3 calculateFaceNormal(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) const;
 };
 

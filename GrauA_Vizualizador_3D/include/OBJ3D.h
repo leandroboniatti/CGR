@@ -55,17 +55,10 @@ public:
 
     BoundingBox getTransformedBoundingBox() const;
 
+    // Testa interseção do segmento (ray) com a bounding box (retorna true se houver interseção)
     bool rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, float& distance) const;
     
-    // Testa a interseção de um segmento de reta com a malha do objeto. O segmento é
-    // definido por dois pontos: início (segStart) e fim (segEnd). "segStart" é o ponto atual
-    // do projétil e "segEnd" é o ponto futuro do projétil. Se houver interseção, retorna o
-    // ponto de interseção mais próximo (hitPoint), a distância dele ao ponto de origem do
-    // segmento (segStart) e a normal da face atingida (hitNormal), para eventual reflexão.
-    bool continuousRayIntersect(const glm::vec3& rayStart, const glm::vec3& rayEnd,
-                               float& distance, glm::vec3& hitPoint, glm::vec3& hitNormal) const;
-
-//private:
+    // Atualiza a matriz de transformação (model matrix) com base na posição, rotação e escala
     void updateTransform();
 };
 
